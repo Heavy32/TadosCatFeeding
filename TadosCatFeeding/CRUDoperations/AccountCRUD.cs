@@ -21,7 +21,6 @@ namespace TadosCatFeeding.CRUDoperations
                 }
                 else
                 {
-                    //password is not saved
                     sqlExpression = $"INSERT INTO Users (Login, Password, Nickname, Role) VALUES ('{info.Login}', '{info.Password}', '{info.Nickname}', '{info.Role}');";
                     command = new SqlCommand(sqlExpression, connection);
                     command.ExecuteNonQuery();
