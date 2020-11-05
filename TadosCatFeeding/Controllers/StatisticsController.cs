@@ -12,12 +12,6 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class StatisticsController : ControllerBase
     {
-        private IConfigurationRoot GetConnection()
-        {
-            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
-            return builder;
-        }
-
         [HttpGet("DifferenceInFeedingByDays")]        
         public IActionResult GetDifferenceBetweenWeekendsAndWeekDays()
         {
@@ -79,6 +73,12 @@ namespace TadosCatFeeding.Controllers
                 }
             }
             return Ok(info);
+        }
+
+        private IConfigurationRoot GetConnection()
+        {
+            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
+            return builder;
         }
     }
 }
