@@ -67,8 +67,8 @@ namespace TadosCatFeeding.Controllers
 
                 if (reader.Read())
                 {
-                    string passwordFromDB = reader.GetString(2);
-                    role = reader.GetString(4);
+                    string passwordFromDB = reader.GetString(0);
+                    role = reader.GetString(1);
 
                     if (passwordFromDB != password)
                     {
