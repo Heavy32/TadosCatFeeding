@@ -43,13 +43,10 @@ namespace TadosCatFeeding.Controllers
 
         private bool CanUserFeedPet(int userId, int petId)
         {
-            string sqlExpression = $"SELECT User_Id, Pet_Id FROM UsersPets WHERE User_Id = {userId} AND Pet_Id = {petId};";
-            //need to hide
-            string connectionString = "Server=DESKTOP-4LLC9DG;Database=CatFeeding;Trusted_Connection=True;MultipleActiveResultSets=true";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(GetConnection().GetSection("ConnectionStrings").GetSection("CatFeedingDB").Value))
             {
                 connection.Open();
+                string sqlExpression = $"SELECT User_Id, Pet_Id FROM UsersPets WHERE User_Id = {userId} AND Pet_Id = {petId};";
 
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
                 SqlDataReader reader = command.ExecuteReader();
