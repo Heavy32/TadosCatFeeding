@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace TadosCatFeeding.Models
 {
     public class FeedingTimePeriod
     {
+        [Required]
         public DateTime Start { get; set; }
+        [Required]
         public DateTime Finish { get; set; }
     }
 }
