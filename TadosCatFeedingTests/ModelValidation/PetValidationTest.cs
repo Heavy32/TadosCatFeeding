@@ -8,7 +8,7 @@ namespace TadosCatFeedingTests.ModelValidation
     public class PetValidationTest
     {
         [TestCaseSource("Pets")]
-        public void ErrorInput(Pet pet)
+        public void ErrorInput(PetModel pet)
         {
             //Arrange
             var context = new ValidationContext(pet, null, null);
@@ -20,12 +20,12 @@ namespace TadosCatFeedingTests.ModelValidation
             Assert.IsFalse(result);
         }
 
-        static Pet[] Pets =
+        static PetModel[] Pets =
         {
-            new Pet {OwnerId = 3},
-            new Pet(),
-            new Pet {Name = ""},
-            new Pet {OwnerId = 0}
+            new PetModel {OwnerId = 3},
+            new PetModel(),
+            new PetModel {Name = ""},
+            new PetModel {OwnerId = 0}
         };
     }
 }

@@ -13,44 +13,39 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using TadosCatFeeding.CRUDoperations;
 using TadosCatFeeding.Models;
+using TadosCatFeeding.Users;
 
 namespace TadosCatFeeding.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class UsersController : ControllerBase
     {
+        private readonly UsersRepository repository;
+        private readonly IConfiguration configuration;
+
+        public UsersController(UsersRepository repository, IConfiguration configuration)
+        {
+            this.configuration = configuration;
+            this.repository = repository;
+            repository.ConnectionString = configuration.GetConnectionString("PetFeedingDB");
+        }
+
         [HttpGet("LogIn")]
         [AllowAnonymous]
-        public async Task LogIn(Account userInfo)
+        public IActionResult LogIn(UserModel userInfo)
         {
-            ClaimsIdentity identity = GetIdentity(userInfo.Login, userInfo.Password);
-            if (identity == null)
+            UserModel user = repository.GetUserByLogindAndPassword(userInfo.Login, userInfo.Password);
+            if(user == null)
             {
-                Response.StatusCode = 400;
-                await Response.WriteAsync("Invalid username or password.");
-                return;
+                return BadRequest("User with this login or password does not exist");
             }
+            ClaimsIdentity identity = GetIdentity(userInfo.Login, userInfo.Password);
+
 
             await GetToken(identity);
         }
 
-        [HttpPost("SignUp")]
-        [AllowAnonymous]
-        public IActionResult SignUp(Account userInfo)
-        {
-            AccountCRUD account = new AccountCRUD();
-            (bool success, string report) = account.Create(userInfo);
-
-            if (success)
-            {
-                return Ok(report);
-            }
-            else
-            {
-                return BadRequest(report);
-            }
-        }
 
         private ClaimsIdentity GetIdentity(string username, string password)
         {

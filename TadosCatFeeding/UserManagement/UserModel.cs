@@ -2,8 +2,9 @@
 
 namespace TadosCatFeeding.CRUDoperations
 {
-    public class Account
+    public class UserModel
     {
+        public int Id { get; set; }
         [Required(ErrorMessage = "Login is required")]
         [RegularExpression("^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$", ErrorMessage = "Must be a valid email")]
         [StringLength(100, ErrorMessage = "Must be between 5 and 100 characters", MinimumLength = 5)]       

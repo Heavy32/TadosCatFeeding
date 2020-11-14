@@ -9,7 +9,7 @@ namespace TadosCatFeeding.CRUDoperations.Tests
     public class AccountCRUDTests
     {
         [TestCaseSource("Accounts")]
-        public void SuccessGetTests(Account account)
+        public void SuccessGetTests(UserModel account)
         {
             AccountCRUD accountCRUD = new AccountCRUD();
             accountCRUD.Create(account);
@@ -21,7 +21,7 @@ namespace TadosCatFeeding.CRUDoperations.Tests
         }
 
         [TestCaseSource("Accounts")]
-        public void SuccessCreateAndDeleteTests(Account account)
+        public void SuccessCreateAndDeleteTests(UserModel account)
         {
             AccountCRUD accountCRUD = new AccountCRUD();
 
@@ -32,13 +32,13 @@ namespace TadosCatFeeding.CRUDoperations.Tests
             Assert.AreEqual(true, deleteResult.success);
         }
 
-        static Account[] Accounts =
+        static UserModel[] Accounts =
         {
-            new Account { Login = "user141@gmail.com", Nickname = "user141", Password = "123456Aa", Role = "User" },
-            new Account { Login = "user21231@gmail.com", Nickname = "user21231", Password = "123456Aa", Role = "User" },
-            new Account { Login = "user31231@gmail.com", Nickname = "user31231", Password = "123456Aa", Role = "User" },
-            new Account { Login = "user1234@gmail.com", Nickname = "user1234", Password = "123456Aa", Role = "User" },
-            new Account { Login = "user5357@gmail.com", Nickname = "user5357", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "user141@gmail.com", Nickname = "user141", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "user21231@gmail.com", Nickname = "user21231", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "user31231@gmail.com", Nickname = "user31231", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "user1234@gmail.com", Nickname = "user1234", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "user5357@gmail.com", Nickname = "user5357", Password = "123456Aa", Role = "User" },
         };
 
         private IConfigurationRoot GetConnection()

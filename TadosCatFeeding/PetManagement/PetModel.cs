@@ -2,7 +2,7 @@
 
 namespace TadosCatFeeding.Models
 {
-    public class Pet
+    public class PetModel
     {
         [Required(ErrorMessage = "Pet's name is required")]
         public string Name { get; set; }

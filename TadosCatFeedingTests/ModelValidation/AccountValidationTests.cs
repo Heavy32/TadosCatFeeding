@@ -7,7 +7,7 @@ namespace TadosCatFeedingTests.ModelValidation
     public class AccountValidationTests
     {
         [TestCaseSource("Accounts")]
-        public void ErrorInput(Account account)
+        public void ErrorInput(UserModel account)
         {
             //Arrange
             var context = new ValidationContext(account, null, null);
@@ -19,13 +19,13 @@ namespace TadosCatFeedingTests.ModelValidation
             Assert.IsFalse(result);
         }
 
-        static Account[] Accounts =
+        static UserModel[] Accounts =
         {
-            new Account(),
-            new Account { Login = "aaa@aaa.com", Nickname = "a", Password = "", Role = "User" },
-            new Account { Login = "1", Nickname = "", Password = "123456Aa", Role = "User" },
-            new Account { Login = "", Nickname = "", Password = "", Role = "User" },
-            new Account { Login = ".com@sd", Nickname = "123123123a", Password = "123123123aaaaaAAa", Role = "" },
+            new UserModel(),
+            new UserModel { Login = "aaa@aaa.com", Nickname = "a", Password = "", Role = "User" },
+            new UserModel { Login = "1", Nickname = "", Password = "123456Aa", Role = "User" },
+            new UserModel { Login = "", Nickname = "", Password = "", Role = "User" },
+            new UserModel { Login = ".com@sd", Nickname = "123123123a", Password = "123123123aaaaaAAa", Role = "" },
         };
     } 
 }
