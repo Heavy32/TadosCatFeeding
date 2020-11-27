@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TadosCatFeeding.Abstractions;
-using TadosCatFeeding.CRUDoperations;
+using TadosCatFeeding.UserManagement;
 
-namespace TadosCatFeeding.Users
+namespace TadosCatFeeding.UserManagement
 {
-    public class UsersRepository : IRepository<UserModel>
+    public class UserRepository : IUserRepository
     {
         public string ConnectionString { get; set; }
 
-        public UsersRepository(string connectionString)
+        public UserRepository(string connectionString)
         {
             ConnectionString = connectionString;
         }
@@ -34,6 +34,8 @@ namespace TadosCatFeeding.Users
 
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
+                
+                reader.Read();
 
                 return reader.HasRows
                     ? new UserModel
@@ -48,20 +50,16 @@ namespace TadosCatFeeding.Users
             }
         }
 
-        public void Create(UserModel info)
+        public int Create(UserModel info)
         {
-            Random rnd = new Random();
-            int id = rnd.Next(Int32.MaxValue, 0);
-
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
-                string sqlExpression = "INSERT INTO Users (Id, Login, Password, Nickname, Role) VALUES (@Id, @Login, @Password, @Nickname, @Role);";
+                string sqlExpression = "INSERT INTO Users (Login, Password, Nickname, Role) VALUES (@Login, @Password, @Nickname, @Role) SELECT CAST(scope_identity() AS int);";
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
 
                 command.Parameters.AddRange(
                     new SqlParameter[]
                     {
-                        new SqlParameter("@Id", id),
                         new SqlParameter("@Login", info.Login),
                         new SqlParameter("@Password", info.Password),
                         new SqlParameter("@Nickname", info.Nickname),
@@ -69,7 +67,7 @@ namespace TadosCatFeeding.Users
                     });
 
                 connection.Open();
-                command.ExecuteNonQuery();
+                return (int)command.ExecuteScalar();
             }
         }
 
@@ -91,13 +89,15 @@ namespace TadosCatFeeding.Users
         {
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
-                string sqlExpression = "SELECT FROM Users WHERE Id = @id";
+                string sqlExpression = "SELECT * FROM Users WHERE Id = @id";
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
 
                 command.Parameters.Add(new SqlParameter("@id", id));
 
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
+
+                reader.Read();
 
                 return reader.HasRows
                     ? new UserModel
@@ -112,7 +112,7 @@ namespace TadosCatFeeding.Users
             }
         }
 
-        public IList<UserModel> GetAll()
+        public List<UserModel> GetAll()
         {
             List<UserModel> users = new List<UserModel>();
             using (SqlConnection connection = new SqlConnection(ConnectionString))
@@ -150,13 +150,14 @@ namespace TadosCatFeeding.Users
         {
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
-                string sqlExpression = "UPDATE Users SET Login = @login, Password = @password, Nickname = @nickname, Role = @role";
+                string sqlExpression = "UPDATE Users SET Login = @login, Password = @password, Nickname = @nickname, Role = @role, WHERE Id = @id";
 
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
 
                 command.Parameters.AddRange(
                     new SqlParameter[]
                     {
+                        new SqlParameter("@login", id),
                         new SqlParameter("@login", info.Login),
                         new SqlParameter("@password", info.Password),
                         new SqlParameter("@nickname", info.Nickname),

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.Statistics
+namespace TadosCatFeeding
 {
-    public class StatisticsCalculation
+    public interface ITestClass
     {
-        
+        public int Number { get; set; }
     }
 }

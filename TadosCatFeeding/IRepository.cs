@@ -11,9 +11,9 @@ namespace TadosCatFeeding.Abstractions
         public string ConnectionString { get; set; }
 
         T Get(int id);
-        IList<T> GetAll();
+        List<T> GetAll();
         void Delete(int id);
         void Update(int id, T info);
-        void Create(T info);
+        int Create(T info);
     }
 }

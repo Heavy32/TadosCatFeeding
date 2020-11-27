@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TadosCatFeeding.CRUDoperations
+namespace TadosCatFeeding.UserManagement
 {
     public class UserModel
     {

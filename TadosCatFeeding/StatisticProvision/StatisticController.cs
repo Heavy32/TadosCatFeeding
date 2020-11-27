@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using TadosCatFeeding.Models;
+using TadosCatFeeding.CatManagement;
+using TadosCatFeeding.StatisticProvision;
+using TadosCatFeeding.UserManagement;
 
 namespace TadosCatFeeding.Controllers
 {
@@ -12,73 +13,55 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class StatisticController : ControllerBase
     {
-        [HttpGet("daysAndWeekendsFeedDifference")]        
-        public IActionResult GetDifferenceBetweenWeekendsAndWeekDays()
+        private readonly IContext context;
+
+        public StatisticController(IContext context)
         {
-            return Ok("test1");
-            //string sqlExpression = "Select Pet_Id, " +
-            //    "CONVERT(decimal(4, 1), " +
-            //    "ROUND(COUNT(CASE WHEN DATEPART(W, Feed_Time) = 6 OR DATEPART(W, Feed_Time) = 7 THEN 0 END) / 2. , 2)) " +
-            //    "- CONVERT(decimal(4, 1), ROUND(COUNT(CASE WHEN DATEPART(W, Feed_Time) != 6 AND DATEPART(W, Feed_Time) != 7 THEN 0 END) / 5. , 2)) as Diff " +
-            //    "FROM FeedTime " +
-            //    "GROUP BY Pet_Id;";
-
-
-            //List<object> info = new List<object>(); 
-            //using (SqlConnection connection = new SqlConnection(GetConnection().GetSection("ConnectionStrings").GetSection("CatFeedingDB").Value))
-            //{
-            //    connection.Open();
-
-            //    SqlCommand command = new SqlCommand(sqlExpression, connection);
-            //    SqlDataReader reader = command.ExecuteReader();
-
-            //    if (reader.HasRows)
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            info.Add(new { PetId = reader.GetInt32(0), Diff = reader.GetDecimal(1) });
-            //        }
-            //    }
-            //}
-
-            //return Ok(info);
+            this.context = context;
         }
 
-        [HttpGet("feedTimeInPeriod")]
-        public IActionResult GetFeedingForPeriod()
+        [HttpGet("~/cats/feedings/statistics/{statisticId}")]
+        public IActionResult Execute(int statisticId)
         {
-            return Ok("test2");
+            StatisticCalculation calculation = new StatisticCalculation(context.StatisticRepository.ConnectionString);
 
-            //List<object> info = new List<object>();
+            string sqlExpression = context.StatisticRepository.Get(statisticId).SqlExpression;
 
-            //using (SqlConnection connection = new SqlConnection(GetConnection().GetSection("ConnectionStrings").GetSection("CatFeedingDB").Value))
-            //{
-            //    connection.Open();
-
-            //    string sqlExpression = $"SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE Feed_Time BETWEEN '' AND ''";
-            //    SqlCommand command = new SqlCommand(sqlExpression, connection);
-            //    SqlDataReader reader = command.ExecuteReader();
-
-            //    if (reader.HasRows)
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            info.Add(new
-            //            {
-            //                UserId = reader.GetInt32(0),
-            //                PetId = reader.GetInt32(1),
-            //                FeedTime = reader.GetDateTime(2)
-            //            });
-            //        }
-            //    }
-            //}
-            //return Ok(info);
+            return Ok(calculation.Execute(sqlExpression));
         }
 
-        private IConfigurationRoot GetConnection()
+        [HttpGet("~/cats/feedings/statistics")]     
+        public IActionResult GetAll()
         {
-            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
-            return builder;
+            List<StatisticModel> list = context.StatisticRepository.GetAll();
+            if(list.Count == 0)
+            {
+                return NoContent();
+            }
+            return Ok(list);           
+        }
+
+        [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
+        public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        {
+            UserModel user = context.UserRepository.Get(userId);
+            if(user == null)
+            {
+                return NotFound("User cannot be found");
+            }
+
+            CatModel cat = context.CatRepository.Get(catId);
+            if(cat == null)
+            {
+                return NotFound("Cat cannot be found");
+            }
+
+            if (user.Login != User.Identity.Name)
+            {
+                return Forbid();
+            }
+
+            return Ok(context.StatisticRepository.GetFeedingForPeriod(userId, catId, start, finish));
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TadosCatFeeding.Models
+namespace TadosCatFeeding.CatManagement
 {
-    public class PetModel
+    public class CatModel
     {
+        public int Id { get; set; }
         [Required(ErrorMessage = "Pet's name is required")]
         public string Name { get; set; }
         [Required(ErrorMessage = "Pet should have an owner!")]

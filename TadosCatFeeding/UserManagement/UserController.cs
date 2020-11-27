@@ -1,86 +1,127 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using TadosCatFeeding.CRUDoperations;
 using TadosCatFeeding.Models;
-using TadosCatFeeding.Users;
+using TadosCatFeeding.UserManagement;
 
 namespace TadosCatFeeding.Controllers
 {
-    [Route("[controller]")]
+    [Route("users")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UserController : ControllerBase
     {
-        private readonly UsersRepository repository;
-        private readonly IConfiguration configuration;
+        private readonly IContext context;
 
-        public UsersController(UsersRepository repository, IConfiguration configuration)
+        public UserController(IContext context)
         {
-            this.configuration = configuration;
-            this.repository = repository;
-            repository.ConnectionString = configuration.GetConnectionString("PetFeedingDB");
+            this.context = context;
         }
 
-        [HttpGet("LogIn")]
+        [HttpPost]
+        public IActionResult Create(UserModel user)
+        {
+            int id =context.UserRepository.Create(user);
+
+            var body = new
+            {
+                token = GetToken(GetIdentity(user)),
+                id
+            };
+
+            return Created(Url.RouteUrl(id) + $"/{id}", body);
+        }
+
+        [HttpGet]
         [AllowAnonymous]
-        public IActionResult LogIn(UserModel userInfo)
+        public IActionResult LogIn()
         {
-            UserModel user = repository.GetUserByLogindAndPassword(userInfo.Login, userInfo.Password);
-            if(user == null)
+            (string login, string password) = ExtractCredentials(Request);
+
+            UserModel user = context.UserRepository.GetUserByLogindAndPassword(login, password);
+            if (user == null)
             {
-                return BadRequest("User with this login or password does not exist");
+                return Unauthorized();
             }
-            ClaimsIdentity identity = GetIdentity(userInfo.Login, userInfo.Password);
 
-
-            await GetToken(identity);
+            return Ok($"Token : {GetToken(GetIdentity(user))},\n UserId : {user.Id}");
         }
 
-
-        private ClaimsIdentity GetIdentity(string username, string password)
+        [HttpGet("{id:int}")]
+        public IActionResult Get(int id)
         {
-            string role;
+            UserModel user = context.UserRepository.Get(id);
 
-            using (SqlConnection connection = new SqlConnection(GetConnection().GetSection("ConnectionStrings").GetSection("CatFeedingDB").Value))
+            if (user == null)
             {
-                connection.Open();
-
-                string sqlExpression = $"SELECT Password, Role FROM Users WHERE Login = '{username}';";
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    string passwordFromDB = reader.GetString(0);
-                    role = reader.GetString(1);
-
-                    if (passwordFromDB != password)
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-                
+                return NotFound();
             }
 
+            return Ok(user);
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            UserModel user = context.UserRepository.Get(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            context.UserRepository.Delete(id);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult Update(int id, UserModel changedInfo)
+        {
+            UserModel user = context.UserRepository.Get(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            UserModel newUser = new UserModel
+            {
+                Id = user.Id,
+                Login = user.Login == changedInfo.Login ? user.Login : changedInfo.Login,
+                Password = user.Password == changedInfo.Password ? user.Password : changedInfo.Password,
+                Nickname = user.Nickname == changedInfo.Nickname ? user.Nickname : changedInfo.Nickname,
+                Role = user.Role == changedInfo.Role ? user.Role : changedInfo.Role,
+            };
+
+            context.UserRepository.Update(id, newUser);
+
+            return NoContent();
+        }
+
+        private (string user, string password) ExtractCredentials(HttpRequest request)
+        {
+            string authHeader = HttpContext.Request.Headers["Authorization"];
+
+            string encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
+
+            Encoding encoding = Encoding.GetEncoding("iso-8859-1");
+            string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
+
+            var t = usernamePassword.Split(':');
+
+            return (t[0], t[1]);
+        }
+
+        private ClaimsIdentity GetIdentity(UserModel user)
+        {    
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, username),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, role),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role),
             };
 
             ClaimsIdentity claimsIdentity =
@@ -89,7 +130,7 @@ namespace TadosCatFeeding.Controllers
             return claimsIdentity;
         }
 
-        private async Task GetToken(ClaimsIdentity identity)
+        private string GetToken(ClaimsIdentity identity)
         {
             var now = DateTime.UtcNow;
 
@@ -103,20 +144,7 @@ namespace TadosCatFeeding.Controllers
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            var response = new
-            {
-                access_token = encodedJwt,
-                username = identity.Name
-            };
-
-            Response.ContentType = "application/json";
-            await Response.WriteAsync(JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented }));
-        }
-
-        private IConfigurationRoot GetConnection()
-        {
-            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
-            return builder;
+            return encodedJwt;
         }
     }
 }
