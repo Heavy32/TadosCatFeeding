@@ -1,11 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.Models;
 
 namespace TadosCatFeeding.CatManagement
 {

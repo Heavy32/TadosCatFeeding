@@ -33,7 +33,7 @@ namespace TadosCatFeeding.PetFeedingManagement.Tests
             //Assert
             Assert.IsNotNull(response);
             Assert.AreEqual("User cannot be found", response.Value);
-            Assert.AreEqual(404, response.Value);
+            Assert.AreEqual(404, response.StatusCode);
         }
 
         [Test]

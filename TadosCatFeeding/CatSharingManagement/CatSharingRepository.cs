@@ -7,28 +7,26 @@ namespace TadosCatFeeding.CatSharingManagement
     public class CatSharingRepository : ICatSharingRepository
     {
         public string ConnectionString { get; set; }
+        private readonly ConnectionSetUp connectionSetUp;
 
         public CatSharingRepository(string connectionString)
         {
             ConnectionString = connectionString;
+            connectionSetUp = new ConnectionSetUp(connectionString);
         }
 
         public int Create(CatSharingModel info)
         {
-            using(SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                string sqlExpression = "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id) SELECT CAST(scope_identity() AS int);";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.AddRange(
-                    new SqlParameter[]
+            SqlCommand command = connectionSetUp.SetUp(
+                "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id) SELECT CAST(scope_identity() AS int);",
+                new SqlParameter[]
                     {
                         new SqlParameter("@user_Id", info.UserId),
                         new SqlParameter("@cat_Id", info.CatId)
                     });
 
-                connection.Open();
+            using (command.Connection)
+            {
                 return (int)command.ExecuteScalar();
             }
         }
@@ -53,24 +51,18 @@ namespace TadosCatFeeding.CatSharingManagement
             throw new NotImplementedException();
         }
 
-        //add to interface
         public bool IsPetSharedWithUser(int userId, int petId)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                string sqlExpression = "SELECT * FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.AddRange(
+            SqlCommand command = connectionSetUp.SetUp(
+                "SELECT * FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;",
                     new SqlParameter[]
                     {
                         new SqlParameter("@user_Id", userId),
                         new SqlParameter("@pet_Id", petId)
                     });
 
-                connection.Open();
-
+            using (command.Connection)
+            {                
                 return command.ExecuteReader().HasRows;
             }
         }

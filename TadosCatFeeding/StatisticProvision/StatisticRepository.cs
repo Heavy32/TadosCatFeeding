@@ -7,26 +7,21 @@ namespace TadosCatFeeding.StatisticProvision
     public class StatisticRepository : IStatisticRepository
     {
         public string ConnectionString { get; set; }
+        private readonly ConnectionSetUp connectionSetUp;
 
         public StatisticRepository(string connectionString)
         {
             ConnectionString = connectionString;
+            connectionSetUp = new ConnectionSetUp(connectionString);
         }
 
         public List<DateTime> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
         {
             List<DateTime> info = new List<DateTime>();
 
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                connection.Open();
-
-                string sqlExpression = $"SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.AddRange(
-                    new SqlParameter[]
+            SqlCommand command = connectionSetUp.SetUp(
+                "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
+                new SqlParameter[]
                     {
                         new SqlParameter("@userId", userId),
                         new SqlParameter("@catId", catId),
@@ -34,6 +29,8 @@ namespace TadosCatFeeding.StatisticProvision
                         new SqlParameter("@finish", finish)
                     });
 
+            using (command.Connection)
+            {        
                 SqlDataReader reader = command.ExecuteReader();
 
                 if (reader.HasRows)
@@ -49,22 +46,17 @@ namespace TadosCatFeeding.StatisticProvision
 
         public int Create(StatisticModel info)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                //change statistics2
-                string sqlExpression = "INSERT INTO Statistics2 (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression) SELECT CAST(scope_identity() AS int);";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.AddRange(
-                    new SqlParameter[]
+            SqlCommand command = connectionSetUp.SetUp(
+                "INSERT INTO Statistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression) SELECT CAST(scope_identity() AS int);",
+                new SqlParameter[]
                     {
                         new SqlParameter("@name", info.Name),
                         new SqlParameter("@description", info.Description),
                         new SqlParameter("@sqlExpression", info.Description)
                     });
 
-                connection.Open();
+            using (command.Connection)
+            {         
                 return (int)command.ExecuteScalar();
             }
         }
@@ -76,14 +68,15 @@ namespace TadosCatFeeding.StatisticProvision
 
         public StatisticModel Get(int id)
         {
-            using(SqlConnection connection = new SqlConnection(ConnectionString))
+            SqlCommand command = connectionSetUp.SetUp(
+                "SELECT * FROM Statistics WHERE Id = @id",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@id", id)
+                });
+
+            using (command.Connection)
             {
-                string sqlExpression = "SELECT * FROM Statistics2 WHERE Id = @id";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                command.Parameters.Add(new SqlParameter("@id", id));
-
-                connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
 
                 if (reader.HasRows)
@@ -106,13 +99,12 @@ namespace TadosCatFeeding.StatisticProvision
         public List<StatisticModel> GetAll()
         {
             List<StatisticModel> statistics = new List<StatisticModel>();
+            SqlCommand command = connectionSetUp.SetUp(
+                "SELECT * FROM Statistics",
+                new SqlParameter[] { });
 
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                string sqlExpression = "SELECT * FROM Statistics2";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                connection.Open();
+            using (command.Connection)
+            {                
                 SqlDataReader reader = command.ExecuteReader();
 
                 if (reader.HasRows)

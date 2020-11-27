@@ -1,5 +1,4 @@
-﻿using TadosCatFeeding.PetSharingManagement;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Moq;
 using TadosCatFeeding.UserManagement;
 using TadosCatFeeding.CatManagement;

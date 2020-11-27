@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using TadosCatFeeding.CatManagement;
 using TadosCatFeeding.StatisticProvision;
 using TadosCatFeeding.UserManagement;
@@ -42,6 +42,7 @@ namespace TadosCatFeeding.Controllers
         }
 
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
         {
             UserModel user = context.UserRepository.Get(userId);

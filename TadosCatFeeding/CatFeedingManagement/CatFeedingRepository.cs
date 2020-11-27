@@ -7,29 +7,27 @@ namespace TadosCatFeeding.CatFeedingManagement
     public class CatFeedingRepository : ICatFeedingRepository
     {
         public string ConnectionString { get; set; }
+        private readonly ConnectionSetUp connectionSetUp;
 
         public CatFeedingRepository(string connectionString)
         {
             ConnectionString = connectionString;
+            connectionSetUp = new ConnectionSetUp(connectionString);
         }
 
         public int Create(CatFeedingModel info)
         {
-            using(SqlConnection connection = new SqlConnection(ConnectionString))
+            SqlCommand command = connectionSetUp.SetUp(
+                "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time), VALUES (@user_Id, @pet_Id, @feed_Time) SELECT CAST(scope_identity() AS int);",
+                 new SqlParameter[]
+                 {
+                     new SqlParameter("@user_Id", info.UserId),
+                     new SqlParameter("@pet_Id", info.CatId),
+                     new SqlParameter("@feed_Time", info.FeedingTime)
+                 });
+
+            using (command.Connection)
             {
-                string sqlExpression = "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time), VALUES (@user_Id, @pet_Id, @feed_Time) SELECT CAST(scope_identity() AS int);";
-
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.Add(
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@user_Id", info.UserId),
-                        new SqlParameter("@pet_Id", info.CatId),
-                        new SqlParameter("@feed_Time", info.FeedingTime)
-                    });
-
-                connection.Open();
                 return (int)command.ExecuteScalar();
             }
         }

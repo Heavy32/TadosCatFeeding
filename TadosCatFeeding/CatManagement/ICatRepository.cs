@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TadosCatFeeding.Abstractions;
-using TadosCatFeeding.Models;
+﻿using TadosCatFeeding.Abstractions;
 
 namespace TadosCatFeeding.CatManagement
 {

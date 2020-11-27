@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ namespace TadosCatFeeding.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Create(UserModel user)
         {
             int id =context.UserRepository.Create(user);
@@ -38,7 +40,6 @@ namespace TadosCatFeeding.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult LogIn()
         {
             (string login, string password) = ExtractCredentials(Request);
@@ -53,6 +54,7 @@ namespace TadosCatFeeding.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Get(int id)
         {
             UserModel user = context.UserRepository.Get(id);
@@ -65,21 +67,23 @@ namespace TadosCatFeeding.Controllers
             return Ok(user);
         }
 
-        [HttpDelete]
-        public IActionResult Delete(int id)
+        [HttpDelete("{userId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Delete(int userId)
         {
-            UserModel user = context.UserRepository.Get(id);
+            UserModel user = context.UserRepository.Get(userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            context.UserRepository.Delete(id);
+            context.UserRepository.Delete(userId);
 
             return NoContent();
         }
 
         [HttpPatch("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Update(int id, UserModel changedInfo)
         {
             UserModel user = context.UserRepository.Get(id);

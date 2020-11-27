@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using TadosCatFeeding.CatManagement;
 using TadosCatFeeding.CatSharingManagement;
 using TadosCatFeeding.UserManagement;

@@ -128,11 +128,5 @@ namespace TadosCatFeedingTests.UserManagement
             Assert.IsNotNull(response);
             Assert.AreEqual(response.StatusCode, 404);
         }
-
-        [Test]
-        public void Post()
-        {
-
-        }
     }
 }
