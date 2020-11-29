@@ -29,7 +29,7 @@ namespace TadosCatFeeding.Controllers
 
             if (user.Login != User.Identity.Name)
             {
-                return Forbid("You cannot feed this cat");
+                return Forbid("You have no permission to create a cat for another user");
             }
 
             CatModel cat = new CatModel

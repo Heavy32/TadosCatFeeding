@@ -64,6 +64,11 @@ namespace TadosCatFeeding.Controllers
                 return NotFound();
             }
 
+            if (user.Login != User.Identity.Name)
+            {
+                return Forbid("You cannot get information about this user");
+            }
+
             return Ok(user);
         }
 

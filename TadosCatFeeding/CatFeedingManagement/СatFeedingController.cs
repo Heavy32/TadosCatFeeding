@@ -36,7 +36,7 @@ namespace TadosCatFeeding.PetFeedingManagement
                 return NotFound("User cannot be found");
             }
 
-            if(user.Login != User.Identity.Name)
+            if(context.CatSharingRepository.IsPetSharedWithUser(userId, catId))
             {
                 return Forbid("You cannot feed this cat");
             }
