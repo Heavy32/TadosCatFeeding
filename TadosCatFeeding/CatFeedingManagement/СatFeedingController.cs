@@ -19,10 +19,9 @@ namespace TadosCatFeeding.PetFeedingManagement
             this.context = context;
         }
 
-        [HttpPost]
-        [Route("~/users/{userId}/cats/{catId}/feedings")]
+        [HttpPost("~/users/{userId}/cats/{catId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(int userId, int catId, DateTime feedingTime)
+        public IActionResult Feed(int userId, int catId, DateTime feedingTime)
         {
             CatModel cat = context.CatRepository.Get(catId);
             if (cat == null)

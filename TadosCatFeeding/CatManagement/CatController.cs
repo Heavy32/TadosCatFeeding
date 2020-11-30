@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TadosCatFeeding.CatManagement;
+using TadosCatFeeding.CatSharingManagement;
 using TadosCatFeeding.UserManagement;
 
 namespace TadosCatFeeding.Controllers
@@ -27,7 +28,7 @@ namespace TadosCatFeeding.Controllers
                 return NotFound();
             }
 
-            if (user.Login != User.Identity.Name)
+            if (user.Login != User.Identity.Name || !User.IsInRole("Admin"))
             {
                 return Forbid("You have no permission to create a cat for another user");
             }
@@ -39,8 +40,9 @@ namespace TadosCatFeeding.Controllers
             };
 
             int catId = context.CatRepository.Create(cat);
-            
-            return Created(Url.RouteUrl(catId) + $"/{catId}", catId);
+            context.CatSharingRepository.Create(new CatSharingModel { CatId = catId, UserId = userId });
+
+            return Created("Get method is not implemented", catId);
         }
     }    
 }

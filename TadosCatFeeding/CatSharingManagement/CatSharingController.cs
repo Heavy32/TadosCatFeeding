@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TadosCatFeeding.CatManagement;
 using TadosCatFeeding.CatSharingManagement;
 using TadosCatFeeding.UserManagement;
@@ -16,8 +18,9 @@ namespace TadosCatFeeding.PetSharingManagement
             this.context = context;
         }
 
-        [HttpPut("users/{userId}/cats/{catId}")]
-        public IActionResult Share(int userId, int catId)
+        [HttpPut("~/users/{userId}/cats/{catId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Share(int userId, int catId, int ShareWithUserId)
         {
             CatModel cat = context.CatRepository.Get(catId);
             if (cat == null)
@@ -31,18 +34,17 @@ namespace TadosCatFeeding.PetSharingManagement
                 return NotFound("User cannot be found");
             }
 
-            if(context.CatSharingRepository.IsPetSharedWithUser(userId, catId))
+            if (!context.CatSharingRepository.IsPetSharedWithUser(ShareWithUserId, catId))
             {
-                return NoContent();
+                CatSharingModel link = new CatSharingModel
+                {
+                    UserId = ShareWithUserId,
+                    CatId = catId,
+                };
+
+                context.CatSharingRepository.Create(link);
             }
 
-            CatSharingModel link = new CatSharingModel
-            {
-                UserId = userId,
-                CatId = catId,
-            };
-
-            context.CatSharingRepository.Create(link);
             return NoContent();
         }
     }

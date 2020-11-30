@@ -22,7 +22,7 @@ namespace TadosCatFeeding.CatSharingManagement
                 new SqlParameter[]
                     {
                         new SqlParameter("@user_Id", info.UserId),
-                        new SqlParameter("@cat_Id", info.CatId)
+                        new SqlParameter("@pet_id", info.CatId)
                     });
 
             using (command.Connection)
