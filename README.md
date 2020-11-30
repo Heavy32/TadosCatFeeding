@@ -2,7 +2,9 @@
 
 В данном репозитории представлено само выполнененное задание и небольшие тесты к CRUD методам аккаунта.
 
-Для удобства создан запрос на создание базы данных и таблиц (https://github.com/Heavy32/TadosCatFeeding/blob/master/TableCreation.sql). Для того, чтобы протестировать самому, нужно в appsettings.json указать сервер, на котором вы работаете. 
+Для удобства создан запрос на создание базы данных и таблиц (https://github.com/Heavy32/TadosCatFeeding/blob/master/TableCreation.sql).
+А так же диаграма таблиц (https://github.com/Heavy32/TadosCatFeeding/blob/master/Database.png)
+Для того, чтобы протестировать самому, нужно в appsettings.json указать сервер, на котором вы работаете. 
 Все можно протестировать через Postman (я так тестировал).
 
 Задания:
