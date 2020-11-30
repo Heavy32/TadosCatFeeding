@@ -26,3 +26,10 @@ CREATE TABLE UsersPets (
 	    User_Id INT NOT NULL FOREIGN KEY REFERENCES Users,
 		 Pet_Id INT NOT NULL FOREIGN KEY REFERENCES Pets,
 );
+
+CREATE TABLE Statistics (
+	       Id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	     Name nvarchar(50) NOT NULL,
+  Description nvarchar(250) NOT NULL,
+SQLExpression nvarchar(max) NOT NULL
+);
