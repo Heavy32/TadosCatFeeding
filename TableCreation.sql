@@ -33,3 +33,10 @@ CREATE TABLE Statistics (
   Description nvarchar(250) NOT NULL,
 SQLExpression nvarchar(max) NOT NULL
 );
+
+INSERT INTO Statistics (Name, Description, SqlExpression) VALUES ('DifferenceInFeeding', 'Return the difference between weekends and non-weekends feeding' , 
+'Select Pet_Id, 
+CONVERT(decimal(4, 1), ROUND(COUNT(CASE WHEN DATEPART(W, Feed_Time) = 6 OR DATEPART(W, Feed_Time) = 7 THEN 0 END) / 2. , 2)) - CONVERT(decimal(4, 1), 
+ROUND(COUNT(CASE WHEN DATEPART(W, Feed_Time) != 6 AND DATEPART(W, Feed_Time) != 7 THEN 0 END) / 5. , 2)) as Diff
+FROM FeedTime 
+GROUP BY Pet_Id;');
