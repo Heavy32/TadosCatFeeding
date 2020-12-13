@@ -41,18 +41,19 @@ namespace TadosCatFeeding.Controllers
             return Ok(list);           
         }
 
+        //shouldn't be here
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
         {
             UserModel user = context.UserRepository.Get(userId);
-            if(user == null)
+            if (user == null)
             {
                 return NotFound("User cannot be found");
             }
 
             CatModel cat = context.CatRepository.Get(catId);
-            if(cat == null)
+            if (cat == null)
             {
                 return NotFound("Cat cannot be found");
             }

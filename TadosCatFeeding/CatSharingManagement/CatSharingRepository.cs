@@ -17,7 +17,7 @@ namespace TadosCatFeeding.CatSharingManagement
 
         public int Create(CatSharingModel info)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id) SELECT CAST(scope_identity() AS int);",
                 new SqlParameter[]
                     {
@@ -53,7 +53,7 @@ namespace TadosCatFeeding.CatSharingManagement
 
         public bool IsPetSharedWithUser(int userId, int petId)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT * FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;",
                     new SqlParameter[]
                     {

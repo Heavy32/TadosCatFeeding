@@ -16,11 +16,15 @@ namespace TadosCatFeeding
             this.connectionString = connectionString;
         }
 
-        public SqlCommand SetUp(string sqlExpression, SqlParameter[] parameters)
+        public object ExecuteSqlQuery(
+            string sqlExpression,
+            string connectionString,
+            SqlCommand command,
+            SqlParameter[] parameters)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            var connection = new SqlConnection(connectionString);
 
-            SqlCommand command = new SqlCommand(sqlExpression, connection);
+            var command = new SqlCommand(sqlExpression, connection);
             command.Parameters.AddRange(parameters);
 
             connection.Open();

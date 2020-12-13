@@ -17,7 +17,7 @@ namespace TadosCatFeeding.CatFeedingManagement
 
         public int Create(CatFeedingModel info)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time) VALUES (@user_Id, @pet_Id, @feed_Time) SELECT CAST(scope_identity() AS int);",
                  new SqlParameter[]
                  {

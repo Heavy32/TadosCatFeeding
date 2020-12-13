@@ -19,7 +19,7 @@ namespace TadosCatFeeding.StatisticProvision
         {
             List<DateTime> info = new List<DateTime>();
 
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
                 new SqlParameter[]
                     {
@@ -46,7 +46,7 @@ namespace TadosCatFeeding.StatisticProvision
 
         public int Create(StatisticModel info)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "INSERT INTO Statistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression) SELECT CAST(scope_identity() AS int);",
                 new SqlParameter[]
                     {
@@ -68,7 +68,7 @@ namespace TadosCatFeeding.StatisticProvision
 
         public StatisticModel Get(int id)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT * FROM Statistics WHERE Id = @id",
                 new SqlParameter[]
                 {
@@ -99,7 +99,7 @@ namespace TadosCatFeeding.StatisticProvision
         public List<StatisticModel> GetAll()
         {
             List<StatisticModel> statistics = new List<StatisticModel>();
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT * FROM Statistics",
                 new SqlParameter[] { });
 

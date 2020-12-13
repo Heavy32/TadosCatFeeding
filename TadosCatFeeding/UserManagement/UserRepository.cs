@@ -17,7 +17,7 @@ namespace TadosCatFeeding.UserManagement
 
         public UserModel GetUserByLogindAndPassword(string login, string password)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT * FROM Users WHERE Login = @login AND Password = @password", 
                 new SqlParameter[]
                 {
@@ -46,7 +46,7 @@ namespace TadosCatFeeding.UserManagement
 
         public int Create(UserModel info)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "INSERT INTO Users (Login, Password, Nickname, Role) VALUES (@Login, @Password, @Nickname, @Role) SELECT CAST(scope_identity() AS int);",
                 new SqlParameter[]
                     {
@@ -64,7 +64,7 @@ namespace TadosCatFeeding.UserManagement
 
         public void Delete(int id)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "DELETE FROM Users WHERE Id = @id",
                 new SqlParameter[]
                 {
@@ -79,7 +79,7 @@ namespace TadosCatFeeding.UserManagement
 
         public UserModel Get(int id)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "SELECT * FROM Users WHERE Id = @id",
                 new SqlParameter[]
                 {
@@ -112,7 +112,7 @@ namespace TadosCatFeeding.UserManagement
 
         public void Update(int id, UserModel info)
         {
-            SqlCommand command = connectionSetUp.SetUp(
+            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
                 "UPDATE Users SET Login = @login, Password = @password, Nickname = @nickname, Role = @role WHERE Id = @id;",
                 new SqlParameter[]
                     {
