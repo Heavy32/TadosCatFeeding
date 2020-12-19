@@ -16,10 +16,8 @@ namespace TadosCatFeeding
             this.connectionString = connectionString;
         }
 
-        public object ExecuteSqlQuery(
+        public SqlCommand ExecuteSqlQuery(
             string sqlExpression,
-            string connectionString,
-            SqlCommand command,
             SqlParameter[] parameters)
         {
             var connection = new SqlConnection(connectionString);
