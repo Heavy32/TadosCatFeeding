@@ -4,18 +4,16 @@ using System.Collections.Generic;
 
 namespace TadosCatFeeding.CatManagement
 {
-    public class CatRepository : ICatRepository
+    public class CatRepository : Repository
     {
-        public string ConnectionString { get; set; }
-
-        public CatRepository(string connectionString)
+        public CatRepository(string connectionString) : base(connectionString)
         {
-            ConnectionString = connectionString;
+
         }
 
         public int Create(CatModel info)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
@@ -40,7 +38,7 @@ namespace TadosCatFeeding.CatManagement
 
         public CatModel Get(int id)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TadosCatFeeding.Models;
+using TadosCatFeeding.UserManagement;
 
 namespace TadosCatFeeding
 {
@@ -23,7 +24,9 @@ namespace TadosCatFeeding
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped<IContext>(context => new Context(Configuration.GetConnectionString("PetFeedingDB")));
+            var unitOfWork = new UnitOfWork(Configuration.GetConnectionString("PetFeedingDB"));
+            services.AddScoped(userEntrance => new UserEntrance(unitOfWork));
+            services.AddScoped(userCRUDservice => new UserCRUDService(unitOfWork));
              
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>

@@ -4,12 +4,11 @@ using System.Collections.Generic;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : Repository
     {
-        public string ConnectionString { get; set; }
         private readonly ConnectionSetUp connectionSetUp;
 
-        public UserRepository(string connectionString)
+        public UserRepository(string connectionString) : base(connectionString)
         {
             ConnectionString = connectionString;
             connectionSetUp = new ConnectionSetUp(connectionString);

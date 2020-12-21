@@ -4,14 +4,12 @@ using System.Collections.Generic;
 
 namespace TadosCatFeeding.CatSharingManagement
 {
-    public class CatSharingRepository : ICatSharingRepository
+    public class CatSharingRepository : Repository
     {
-        public string ConnectionString { get; set; }
         private readonly ConnectionSetUp connectionSetUp;
 
-        public CatSharingRepository(string connectionString)
+        public CatSharingRepository(string connectionString) : base(connectionString)
         {
-            ConnectionString = connectionString;
             connectionSetUp = new ConnectionSetUp(connectionString);
         }
 

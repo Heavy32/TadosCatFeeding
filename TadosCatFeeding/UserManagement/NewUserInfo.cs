@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class UserLogIn
+    public class NewUserInfo
     {
-
-
+        
     }
 }

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace TadosCatFeeding.StatisticProvision
 {
-    public class StatisticRepository : IStatisticRepository
+    public class StatisticRepository : Repository
     {
         public string ConnectionString { get; set; }
         private readonly ConnectionSetUp connectionSetUp;
 
-        public StatisticRepository(string connectionString)
+        public StatisticRepository(string connectionString) : base(connectionString)
         {
             ConnectionString = connectionString;
             connectionSetUp = new ConnectionSetUp(connectionString);

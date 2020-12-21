@@ -11,6 +11,7 @@ namespace TadosCatFeeding.UserManagement
         [EmailAddress]
         public string Login { get; set; }
 
+        [CustomValidation]
         [DataType(DataType.Password)]        
         [StringLength(100, ErrorMessage = "Must be between 5 and 100 characters", MinimumLength = 5)]
         [Required(ErrorMessage = "Password is required")]

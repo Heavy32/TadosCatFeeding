@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TadosCatFeeding.Models;
 using TadosCatFeeding.UserManagement;
+using System.Text.Json;
 
 namespace TadosCatFeeding.Controllers
 {
@@ -17,26 +18,28 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IContext context;
+        private readonly UserEntrance userEntrance;
+        private readonly UserCRUDService userCRUDService;
 
-        public UserController(IContext context)
+        public UserController(UserEntrance userEntrance, UserCRUDService userCRUDService)
         {
-            this.context = context;
+            this.userEntrance = userEntrance;
+            this.userCRUDService = userCRUDService;
         }
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Create(UserModel user)
         {
-            int id =context.UserRepository.Create(user);
+            int id = userCRUDService.Create(user);
 
-            var body = new
+            var responseBody = new
             {
-                token = GetToken(GetIdentity(user)),
+                userEntrance.LogIn(user.Login, user.Password).token,
                 id
             };
 
-            return Created(Url.RouteUrl(id) + $"/{id}", body);
+            return Created(Url.RouteUrl(id) + $"/{id}", JsonSerializer.Serialize(responseBody));
         }
 
         [HttpGet]
@@ -44,21 +47,23 @@ namespace TadosCatFeeding.Controllers
         {
             (string login, string password) = ExtractCredentials(Request);
 
-            UserModel user = context.UserRepository.GetUserByLogindAndPassword(login, password);
-            if (user == null)
+            (string token, int userId) responseBody = userEntrance.LogIn(login, password);
+
+            if (responseBody.token == null)
             {
                 return Unauthorized();
             }
 
-            return Ok($"Token : {GetToken(GetIdentity(user))},\n UserId : {user.Id}");
+            return Ok(JsonSerializer.Serialize(responseBody));
         }
 
         [HttpGet("{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Get(int id)
         {
-            UserModel user = context.UserRepository.Get(id);
+            UserModel user = userCRUDService.Get(id);
 
+            //should be a validation
             if (user == null)
             {
                 return NotFound();
@@ -76,44 +81,45 @@ namespace TadosCatFeeding.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Delete(int userId)
         {
-            UserModel user = context.UserRepository.Get(userId);
+            //should be a validation
+            UserModel user = userCRUDService.Get(userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            context.UserRepository.Delete(userId);
+            userCRUDService.Delete(userId);
 
             return NoContent();
         }
 
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Update(int id, UserModel changedInfo)
+        public IActionResult Update(int id, NewUserInfo newUserInfo)
         {
-            UserModel user = context.UserRepository.Get(id);
+            //should be a validation
+            UserModel user = userCRUDService.Get(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            UserModel newUser = new UserModel
-            {
-                Id = user.Id,
-                Login = user.Login == changedInfo.Login ? user.Login : changedInfo.Login,
-                Password = user.Password == changedInfo.Password ? user.Password : changedInfo.Password,
-                Nickname = user.Nickname == changedInfo.Nickname ? user.Nickname : changedInfo.Nickname,
-                Role = user.Role == changedInfo.Role ? user.Role : changedInfo.Role,
-            };
-
-            context.UserRepository.Update(id, newUser);
+            //should I map newUserInfo to UserModel?
+            userCRUDService.Update(id,
+                new UserModel
+                {
+                    Id = newUserInfo.Id,
+                    Login = newUserInfo.Login,
+                    Password = newUserInfo.Password,
+                    Nickname = newUserInfo.Nickname
+                });
 
             return NoContent();
         }
 
         private (string user, string password) ExtractCredentials(HttpRequest request)
         {
-            string authHeader = HttpContext.Request.Headers["Authorization"];
+            string authHeader = request.Headers["Authorization"];
 
             string encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
 
@@ -123,37 +129,6 @@ namespace TadosCatFeeding.Controllers
             var t = usernamePassword.Split(':');
 
             return (t[0], t[1]);
-        }
-
-        private ClaimsIdentity GetIdentity(UserModel user)
-        {    
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role),
-            };
-
-            ClaimsIdentity claimsIdentity =
-            new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
-            return claimsIdentity;
-        }
-
-        private string GetToken(ClaimsIdentity identity)
-        {
-            var now = DateTime.UtcNow;
-
-            var jwt = new JwtSecurityToken(
-                    issuer: AuthOptions.ISSUER,
-                    audience: AuthOptions.AUDIENCE,
-                    notBefore: now,
-                    claims: identity.Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            return encodedJwt;
         }
     }
 }
