@@ -2,15 +2,20 @@
 
 namespace TadosCatFeeding.StatisticProvision
 {
-    public class StatisticCRUDService : IStatisticCRUDService
+    public class StatisticService : IStatisticService
     {
         private readonly IStatisticRepository statisticRepository;
         private readonly IStatisticCalculation calculation;
 
-        public StatisticCRUDService(IStatisticRepository statisticRepository, IStatisticCalculation calculation)
+        public StatisticService(IStatisticRepository statisticRepository, IStatisticCalculation calculation)
         {
             this.statisticRepository = statisticRepository;
             this.calculation = calculation;
+        }
+
+        public StatisticResult Execute(string sqlExpression)
+        {
+            calculation.Execute(sqlExpression);
         }
 
         public ServiceResult<StatisticResult> GetStatisticResult(int id)

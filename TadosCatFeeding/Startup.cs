@@ -47,7 +47,7 @@ namespace TadosCatFeeding
             services.AddScoped<IUserEntrance>(userEntrance => new UserEntrance(userRepository, new HashWithSaltProtector(10)));
             services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10)));
             services.AddScoped<IStatisticCalculation>(statistiCalculation => statisticCalculation);
-            services.AddScoped<IStatisticCRUDService>(statisticCRUDService => new StatisticCRUDService(statisticRepository, statisticCalculation));
+            services.AddScoped<IStatisticService>(statisticCRUDService => new StatisticService(statisticRepository, statisticCalculation));
             services.AddScoped<ICatSharingService>(catSharingService => new CatSharingService(catSharingRepository, catRepository, userRepository));
             services.AddScoped<ICatCRUDService>(catCRUDService => new CatCRUDService(catRepository, catSharingRepository, userRepository));
             services.AddScoped<ICatFeedingService>(catFeedingService => new CatFeedingService(catFeedingRepository, catRepository, userRepository, catSharingRepository));

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TadosCatFeeding.StatisticProvision
 {
-    public interface IStatisticCRUDService
+    public interface IStatisticService
     {
         public ServiceResult<StatisticResult> GetStatisticResult(int id);
         public ServiceResult<List<StatisticModel>> GetAll();

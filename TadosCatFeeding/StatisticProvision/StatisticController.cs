@@ -13,10 +13,10 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class StatisticController : ControllerBase
     {
-        private readonly IStatisticCRUDService statisticService;
+        private readonly IStatisticService statisticService;
         private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public StatisticController(IStatisticCRUDService statisticService, IServiceResultStatusToResponseConverter responseConverter)
+        public StatisticController(IStatisticService statisticService, IServiceResultStatusToResponseConverter responseConverter)
         {
             this.statisticService = statisticService;
             this.responseConverter = responseConverter;

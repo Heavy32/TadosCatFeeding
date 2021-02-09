@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TadosCatFeeding.UserManagement.PasswordProtection;
-
-namespace TadosCatFeeding.UserManagement
+﻿namespace DataBaseManagement.UserManagement
 {
-    public class UserInDB : IUniqueModel
+    public class UserInDB
     {
         public int Id { get; }
         public string Login { get; }
