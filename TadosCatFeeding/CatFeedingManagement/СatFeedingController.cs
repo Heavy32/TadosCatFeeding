@@ -1,9 +1,9 @@
 ﻿using System;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TadosCatFeeding.CatFeedingManagement;
 using TadosCatFeeding.CatManagement;
+using TadosCatFeeding.CatSharingManagement;
 using TadosCatFeeding.UserManagement;
 
 namespace TadosCatFeeding.PetFeedingManagement
@@ -12,43 +12,20 @@ namespace TadosCatFeeding.PetFeedingManagement
     [ApiController]
     public class CatFeedingController : ControllerBase
     {
-        private readonly IContext context;
+        private readonly ICatFeedingService catFeedingService;
+        private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public CatFeedingController(IContext context)
+        public CatFeedingController(ICatFeedingService catFeedingService, IServiceResultStatusToResponseConverter responseConverter)
         {
-            this.context = context;
+            this.catFeedingService = catFeedingService;
+            this.responseConverter = responseConverter;
         }
 
-        [HttpPost("~/users/{userId}/cats/{catId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("~/users/{userId}/cats/{catId}/feedings")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Feed(int userId, int catId, DateTime feedingTime)
         {
-            CatModel cat = context.CatRepository.Get(catId);
-            if (cat == null)
-            {
-                return NotFound("Cat cannot be found");
-            }
-
-            UserModel user = context.UserRepository.Get(userId);
-            if (user == null)
-            {
-                return NotFound("User cannot be found");
-            }
-
-            if(context.CatSharingRepository.IsPetSharedWithUser(userId, catId))
-            {
-                return Forbid("You cannot feed this cat");
-            }
-
-            CatFeedingModel feeding = new CatFeedingModel
-            {
-                CatId = catId,
-                UserId = userId,
-                FeedingTime = feedingTime
-            };
-
-            context.CatFeedingRepository.Create(feeding);
-            return NoContent();
+            return responseConverter.GetResponse(catFeedingService.Feed(new CatFeedingCreateModel(catId, userId, DateTime.Now)));
         }
     }
 }

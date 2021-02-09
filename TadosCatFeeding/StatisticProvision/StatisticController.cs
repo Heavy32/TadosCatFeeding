@@ -13,57 +13,50 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class StatisticController : ControllerBase
     {
-        private readonly IContext context;
+        private readonly IStatisticCRUDService statisticService;
+        private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public StatisticController(IContext context)
+        public StatisticController(IStatisticCRUDService statisticService, IServiceResultStatusToResponseConverter responseConverter)
         {
-            this.context = context;
+            this.statisticService = statisticService;
+            this.responseConverter = responseConverter;
         }
 
         [HttpGet("~/cats/feedings/statistics/{statisticId}")]
         public IActionResult Execute(int statisticId)
         {
-            StatisticCalculation calculation = new StatisticCalculation(context.StatisticRepository.ConnectionString);
-
-            string sqlExpression = context.StatisticRepository.Get(statisticId).SqlExpression;
-
-            return Ok(calculation.Execute(sqlExpression));
+            return responseConverter.GetResponse(statisticService.GetStatisticResult(statisticId));
         }
 
         [HttpGet("~/cats/feedings/statistics")]     
         public IActionResult GetAll()
         {
-            List<StatisticModel> list = context.StatisticRepository.GetAll();
-            if(list.Count == 0)
-            {
-                return NoContent();
-            }
-            return Ok(list);           
+            return responseConverter.GetResponse(statisticService.GetAll());   
         }
 
         //shouldn't be here
-        [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
-        {
-            UserModel user = context.UserRepository.Get(userId);
-            if (user == null)
-            {
-                return NotFound("User cannot be found");
-            }
+    //    [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
+    //    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //    public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+    //    {
+    //        UserModel user = context.UserRepository.Get(userId);
+    //        if (user == null)
+    //        {
+    //            return NotFound("User cannot be found");
+    //        }
 
-            CatModel cat = context.CatRepository.Get(catId);
-            if (cat == null)
-            {
-                return NotFound("Cat cannot be found");
-            }
+    //        CatModel cat = context.CatRepository.Get(catId);
+    //        if (cat == null)
+    //        {
+    //            return NotFound("Cat cannot be found");
+    //        }
 
-            if (user.Login != User.Identity.Name)
-            {
-                return Forbid();
-            }
+    //        if (user.Login != User.Identity.Name)
+    //        {
+    //            return Forbid();
+    //        }
 
-            return Ok(context.StatisticRepository.GetFeedingForPeriod(userId, catId, start, finish));
-        }
+    //        return Ok(context.StatisticRepository.GetFeedingForPeriod(userId, catId, start, finish));
+    //    }
     }
 }

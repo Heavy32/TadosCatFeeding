@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TadosCatFeeding.StatisticProvision
 {
-    public class StatisticCalculation
+    public class StatisticCalculation : IStatisticCalculation
     {
         private readonly string connectionString;
 
@@ -12,9 +12,9 @@ namespace TadosCatFeeding.StatisticProvision
             this.connectionString = connectionString;
         }
 
-        public List<Dictionary<string, object>> Execute(string sqlExpression)
+        public StatisticResult Execute(string sqlExpression)
         {
-            List<Dictionary<string, object>> info = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
 
             using(SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -22,21 +22,19 @@ namespace TadosCatFeeding.StatisticProvision
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
 
-                if (reader.HasRows)
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+
+                    for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        Dictionary<string, object> row = new Dictionary<string, object>();
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            row.Add(reader.GetName(i), reader.GetValue(i));
-                        }
-
-                        info.Add(row);
+                        row.Add(reader.GetName(i), reader.GetValue(i));
                     }
+
+                    results.Add(row);
                 }
-                return info;
+
+                return new StatisticResult(results);
             }
         }
     }

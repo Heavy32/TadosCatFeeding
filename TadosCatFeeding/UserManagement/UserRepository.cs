@@ -1,131 +1,101 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
+using System.Data;
+using TadosCatFeeding.UserManagement.PasswordProtection;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class UserRepository : Repository
+    public class UserRepository : Repository, IUserRepository
     {
-        private readonly ConnectionSetUp connectionSetUp;
+        private readonly HashWithSaltProtector protection;
 
-        public UserRepository(string connectionString) : base(connectionString)
+        public UserRepository(string connectionString, HashWithSaltProtector protection) : base(connectionString)
         {
-            ConnectionString = connectionString;
-            connectionSetUp = new ConnectionSetUp(connectionString);
+            this.protection = protection;
         }
 
-        public UserModel GetUserByLogindAndPassword(string login, string password)
+        public UserInDB GetUserByLogin(string login)
         {
-            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
-                "SELECT * FROM Users WHERE Login = @login AND Password = @password", 
+            return ReturnCustomItem(
+                "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Login = @login",
+                ReturnUser,
                 new SqlParameter[]
                 {
                     new SqlParameter("@login", login),
-                    new SqlParameter("@password", password)
                 });
-
-            using (command.Connection)
-            {
-                SqlDataReader reader = command.ExecuteReader();
-
-                reader.Read();
-
-                return reader.HasRows
-                    ? new UserModel
-                    {
-                        Id = reader.GetInt32(0),
-                        Login = reader.GetString(1),
-                        Password = reader.GetString(2),
-                        Nickname = reader.GetString(3),
-                        Role = reader.GetString(4)
-                    }
-                    : null;
-            }
         }        
 
-        public int Create(UserModel info)
-        {
-            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
-                "INSERT INTO Users (Login, Password, Nickname, Role) VALUES (@Login, @Password, @Nickname, @Role) SELECT CAST(scope_identity() AS int);",
+        public int Create(UserInDB info)
+        {            
+            int id = (int)ExecuteWithOutResult(
+                "INSERT INTO Users (Login, Nickname, Role, Salt, HashedPassword) VALUES (@Login, @Nickname, @Role, @Salt, @Password); SET @id=SCOPE_IDENTITY();",
                 new SqlParameter[]
                     {
                         new SqlParameter("@Login", info.Login),
-                        new SqlParameter("@Password", info.Password),
                         new SqlParameter("@Nickname", info.Nickname),
-                        new SqlParameter("@Role", info.Role)
+                        new SqlParameter("@Role", info.Role),
+                        new SqlParameter("@Salt", info.Salt),
+                        new SqlParameter("@password", info.HashedPassword),
+                        new SqlParameter
+                        {
+                            ParameterName = "@id",
+                            SqlDbType = SqlDbType.Int,
+                            Direction = ParameterDirection.Output
+                        }
                     });
 
-            using (command.Connection)
-            {
-                return (int)command.ExecuteScalar();
-            }
+            return id;
         }
 
         public void Delete(int id)
         {
-            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
+            Execute(
                 "DELETE FROM Users WHERE Id = @id",
                 new SqlParameter[]
                 {
                     new SqlParameter("@id", id)
                 });
-
-            using(command.Connection)
-            {
-                command.ExecuteNonQuery();
-            }
         }
 
-        public UserModel Get(int id)
+        public UserInDB Get(int id)
         {
-            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
-                "SELECT * FROM Users WHERE Id = @id",
+            return ReturnCustomItem(
+                "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Id = @id",
+                ReturnUser,
                 new SqlParameter[]
                 {
                     new SqlParameter("@id", id)
                 });
-
-            using (command.Connection)
-            {
-                SqlDataReader reader = command.ExecuteReader();
-
-                reader.Read();
-
-                return reader.HasRows
-                    ? new UserModel
-                    {
-                        Id = reader.GetInt32(0),
-                        Login = reader.GetString(1),
-                        Password = reader.GetString(2),
-                        Nickname = reader.GetString(3),
-                        Role = reader.GetString(4)
-                    }
-                    : null;
-            }
         }
 
-        public List<UserModel> GetAll()
+        public void Update(int id, UserInDB info)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Update(int id, UserModel info)
-        {
-            SqlCommand command = connectionSetUp.ExecuteSqlQuery(
-                "UPDATE Users SET Login = @login, Password = @password, Nickname = @nickname, Role = @role WHERE Id = @id;",
+            Execute(
+                "UPDATE Users SET Login = @login, Salt = @Salt, HashedPassword = @password, Nickname = @nickname, Role = @role WHERE Id = @id;",
                 new SqlParameter[]
                     {
                         new SqlParameter("@id", id),
-                        new SqlParameter("@login", info.Login),
-                        new SqlParameter("@password", info.Password),
-                        new SqlParameter("@nickname", info.Nickname),
-                        new SqlParameter("@role", info.Role)
+                        new SqlParameter("@Login", info.Login),
+                        new SqlParameter("@Nickname", info.Nickname),
+                        new SqlParameter("@Role", info.Role),
+                        new SqlParameter("@Salt", info.Salt),
+                        new SqlParameter("@password", info.HashedPassword),
                     });
+        }
 
-            using (command.Connection)
-            {
-                command.ExecuteNonQuery();
-            }
+        private UserInDB ReturnUser(SqlDataReader reader)
+        {
+            UserInDB user = reader.Read()
+                ? new UserInDB(
+                    (int)reader["Id"],
+                    (string)reader["Login"],
+                    (string)reader["Nickname"],
+                    (int)reader["Role"],
+                    (string)reader["Salt"],
+                    (string)reader["HashedPassword"])
+                : null;
+
+            reader.Close();
+            return user;
         }
     }
 }

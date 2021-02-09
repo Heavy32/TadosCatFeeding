@@ -1,49 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TadosCatFeeding.UserManagement.PasswordProtection;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class UserCRUDService
+    public class UserCRUDService : IUserCRUDService
     {
-        private readonly UnitOfWork database;
+        private readonly UserRepository database;
+        private readonly IPasswordProtector<HashedPasswordWithSalt> protector;
 
-        public UserCRUDService(UnitOfWork database)
+        public UserCRUDService(UserRepository database, IPasswordProtector<HashedPasswordWithSalt> protector)
         {
+            this.protector = protector;
             this.database = database;
         }
 
-        public UserModel Get(int id)
+        public ServiceResult<UserGetModel> Get(int id)
         {
-            return database.UserRepository.Get(id);
-        }
+            UserInDB userInDb = database.Get(id);
 
-        public int Create(UserModel info)
-        {
-            return database.UserRepository.Create(info);
-        }
-
-        public void Update(int id, UserModel info)
-        {
-            UserModel user = database.UserRepository.Get(id);
-
-            UserModel newUser = new UserModel
+            if(userInDb == null)
             {
-                Id = user.Id,
-                Login = user.Login == info.Login ? user.Login : info.Login,
-                Password = user.Password == info.Password ? user.Password : info.Password,
-                Nickname = user.Nickname == info.Nickname ? user.Nickname : info.Nickname,
-                Role = user.Role == info.Role ? user.Role : info.Role,
-            };
-
-            database.UserRepository.Update(id, newUser);
+                return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
+            }
+            
+            return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemRecieved, database.Map<UserGetModel, UserInDB>(userInDb));
         }
 
-        public void Delete(int id)
+        public ServiceResult<UserModel> Create(UserCreateModel info)
         {
-            database.UserRepository.Delete(id);
+            HashedPasswordWithSalt hashSalt = protector.ProtectPassword(info.Password);
+
+            UserInDB userInDB = new UserInDB(0, info.Login, info.Nickname, (int)info.Role, hashSalt.Salt, hashSalt.Password);
+
+            int userId = database.Create(userInDB);
+            return new ServiceResult<UserModel>(ServiceResultStatus.ItemCreated, new UserModel(userId, info.Login, info.Password, info.Nickname, info.Role));
+        }
+
+        public ServiceResult<UserModel> Update(int id, UserUpdateModel info)
+        {
+            UserInDB user = database.Get(id);
+            if (user == null)
+            {
+                return new ServiceResult<UserModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
+            }
+
+            bool IsPasswordSame = protector.VerifyPassword(new HashedPasswordWithSalt { Password = user.HashedPassword, Salt = user.Salt }, info.Password ?? "");
+            HashedPasswordWithSalt hashSalt = protector.ProtectPassword(info.Password ?? "");
+
+            UserInDB newUser = new UserInDB(
+                id,
+                info.Login ?? user.Login,
+                info.Nickname ?? user.Nickname,
+                info.Role == default ? user.Role : (int)info.Role,
+                IsPasswordSame ? user.Salt : hashSalt.Salt,
+                IsPasswordSame ? user.HashedPassword : hashSalt.Password
+            );
+
+            database.Update(id, newUser);
+
+            return new ServiceResult<UserModel>(ServiceResultStatus.ItemChanged);
+        }
+
+        public ServiceResult<UserModel> Delete(int id)
+        {
+            UserInDB user = database.Get(id);
+            if (user == null)
+            {
+                return new ServiceResult<UserModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
+            }
+
+            database.Delete(id);
+            return new ServiceResult<UserModel>(ServiceResultStatus.ItemDeleted);
         }
     }
 }

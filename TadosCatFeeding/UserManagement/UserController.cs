@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using TadosCatFeeding.Models;
 using TadosCatFeeding.UserManagement;
-using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TadosCatFeeding.Controllers
 {
@@ -18,103 +14,50 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserEntrance userEntrance;
-        private readonly UserCRUDService userCRUDService;
+        private readonly IUserEntrance userEntrance;
+        private readonly IUserCRUDService userCRUDService;
+        private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public UserController(UserEntrance userEntrance, UserCRUDService userCRUDService)
+        public UserController(IUserEntrance userEntrance, IUserCRUDService userCRUDService, IServiceResultStatusToResponseConverter responseConverter)
         {
             this.userEntrance = userEntrance;
             this.userCRUDService = userCRUDService;
+            this.responseConverter = responseConverter;
         }
-
+        
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(UserModel user)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Create(UserCreateModel user)
         {
-            int id = userCRUDService.Create(user);
-
-            var responseBody = new
-            {
-                userEntrance.LogIn(user.Login, user.Password).token,
-                id
-            };
-
-            return Created(Url.RouteUrl(id) + $"/{id}", JsonSerializer.Serialize(responseBody));
+            return responseConverter.GetResponse(userCRUDService.Create(user), Request.Path.Value);
         }
 
         [HttpGet]
         public IActionResult LogIn()
         {
             (string login, string password) = ExtractCredentials(Request);
-
-            (string token, int userId) responseBody = userEntrance.LogIn(login, password);
-
-            if (responseBody.token == null)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(JsonSerializer.Serialize(responseBody));
+            return responseConverter.GetResponse(userEntrance.LogIn(login, password));
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Get(int id)
-        {
-            UserModel user = userCRUDService.Get(id);
-
-            //should be a validation
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            if (user.Login != User.Identity.Name)
-            {
-                return Forbid("You cannot get information about this user");
-            }
-
-            return Ok(user);
+        {         
+            return responseConverter.GetResponse(userCRUDService.Get(id));
         }
 
-        [HttpDelete("{userId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Delete(int userId)
+        [HttpDelete("{id:int}")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Delete(int id)
         {
-            //should be a validation
-            UserModel user = userCRUDService.Get(userId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            userCRUDService.Delete(userId);
-
-            return NoContent();
+            return responseConverter.GetResponse(userCRUDService.Delete(id));
         }
 
         [HttpPatch("{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Update(int id, NewUserInfo newUserInfo)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Update(int id, UserUpdateModel newUserInfo)
         {
-            //should be a validation
-            UserModel user = userCRUDService.Get(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            //should I map newUserInfo to UserModel?
-            userCRUDService.Update(id,
-                new UserModel
-                {
-                    Id = newUserInfo.Id,
-                    Login = newUserInfo.Login,
-                    Password = newUserInfo.Password,
-                    Nickname = newUserInfo.Nickname
-                });
-
-            return NoContent();
+            return responseConverter.GetResponse(userCRUDService.Update(id, newUserInfo));
         }
 
         private (string user, string password) ExtractCredentials(HttpRequest request)

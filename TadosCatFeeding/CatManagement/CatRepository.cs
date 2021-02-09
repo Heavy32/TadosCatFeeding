@@ -1,78 +1,49 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
+using System.Data;
 
 namespace TadosCatFeeding.CatManagement
 {
-    public class CatRepository : Repository
+    public class CatRepository : Repository, ICatRepository
     {
         public CatRepository(string connectionString) : base(connectionString)
         {
-
         }
 
-        public int Create(CatModel info)
+        public int Create(CatCreateModel info)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlExpression = $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id) SELECT CAST(scope_identity() AS int);";
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.AddRange(
-                    new SqlParameter[]
+            return (int)ExecuteWithOutResult(
+                 $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
+                 new SqlParameter[]
                     {
                         new SqlParameter("@name", info.Name),
-                        new SqlParameter("@owner_Id", info.OwnerId)
+                        new SqlParameter("@owner_Id", info.OwnerId),
+                        new SqlParameter
+                        {
+                            ParameterName = "@id",
+                            SqlDbType = SqlDbType.Int,
+                            Direction = ParameterDirection.Output
+                        }
                     });
-
-                return (int)command.ExecuteScalar();
-            }
-        }
-
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
         }
 
         public CatModel Get(int id)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlExpression = $"SELECT * FROM Pets WHERE Id = @id";
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-
-                command.Parameters.Add(new SqlParameter("@id", id));
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.HasRows)
-                {
-                    if (reader.Read())
-                    {
-                        return new CatModel
-                        {
-                            Id = reader.GetInt32(0),
-                            Name = reader.GetString(1),
-                            OwnerId = reader.GetInt32(2)
-                        };
-                    }
-                }
-                return null;
-            }
+            return ReturnCustomItem(
+                $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
+                ReturnCat,
+                new SqlParameter("@id", id));
         }
 
-        public List<CatModel> GetAll()
+        private CatModel ReturnCat(SqlDataReader reader)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Update(int id, CatModel info)
-        {
-            throw new NotImplementedException();
+            var cat = reader.Read()
+            ? new CatModel(
+                (int)reader["Id"],
+                (string)reader["Name"],
+                (int)reader["Owner_Id"])
+            : null;
+            reader.Close();
+            return cat;
         }
     }
 }

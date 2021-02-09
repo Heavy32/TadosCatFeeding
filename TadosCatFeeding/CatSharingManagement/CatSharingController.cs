@@ -11,41 +11,20 @@ namespace TadosCatFeeding.PetSharingManagement
     [ApiController]
     public class CatSharingController : ControllerBase
     {
-        private readonly IContext context;
+        private readonly ICatSharingService catSharingService;
+        private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public CatSharingController(IContext context)
+        public CatSharingController(ICatSharingService catSharingService, IServiceResultStatusToResponseConverter responseConverter)
         {
-            this.context = context;
+            this.catSharingService = catSharingService;
+            this.responseConverter = responseConverter;
         }
 
         [HttpPut("~/users/{userId}/cats/{catId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Share(int userId, int catId, int ShareWithUserId)
+        public IActionResult Share(int userId, int catId, int UserToShare)
         {
-            CatModel cat = context.CatRepository.Get(catId);
-            if (cat == null)
-            {
-                return NotFound("Cat cannot be found");
-            }
-
-            UserModel user = context.UserRepository.Get(userId);
-            if (user == null)
-            {
-                return NotFound("User cannot be found");
-            }
-
-            if (!context.CatSharingRepository.IsPetSharedWithUser(ShareWithUserId, catId))
-            {
-                CatSharingModel link = new CatSharingModel
-                {
-                    UserId = ShareWithUserId,
-                    CatId = catId,
-                };
-
-                context.CatSharingRepository.Create(link);
-            }
-
-            return NoContent();
+            return responseConverter.GetResponse(catSharingService.Share(new CatUserLink(catId, UserToShare), userId));
         }
     }
 }

@@ -1,10 +1,18 @@
 ﻿namespace TadosCatFeeding.StatisticProvision
 {
-    public class StatisticModel
+    public class StatisticModel : IUniqueModel
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string SqlExpression { get; set; }
+        public int Id { get; }
+        public string Name { get; }
+        public string Description { get; }
+        public string SqlExpression { get; }
+
+        public StatisticModel(int id, string name, string description, string sqlExpression)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+            SqlExpression = sqlExpression;
+        }
     }
 }

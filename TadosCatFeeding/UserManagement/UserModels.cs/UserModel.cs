@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class UserModel
+    public class UserModel : IUniqueModel
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Login is required")]
@@ -11,7 +13,6 @@ namespace TadosCatFeeding.UserManagement
         [EmailAddress]
         public string Login { get; set; }
 
-        [CustomValidation]
         [DataType(DataType.Password)]        
         [StringLength(100, ErrorMessage = "Must be between 5 and 100 characters", MinimumLength = 5)]
         [Required(ErrorMessage = "Password is required")]
@@ -21,7 +22,18 @@ namespace TadosCatFeeding.UserManagement
         public string Nickname { get; set; }
 
         [Required(ErrorMessage = "Role is required")]
-        public string Role { get;set; }
+        public Roles Role { get; set; }
+
+        public UserModel() { }
+
+        public UserModel(int id, string login, string password, string nickname, Roles role)
+        {
+            Id = id;
+            Login = login;
+            Password = password;
+            Nickname = nickname;
+            Role = role;
+        }
     }
 }
 

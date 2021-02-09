@@ -7,8 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using TadosCatFeeding.Models;
+using TadosCatFeeding.CatFeedingManagement;
+using TadosCatFeeding.CatManagement;
+using TadosCatFeeding.CatSharingManagement;
+using TadosCatFeeding.StatisticProvision;
 using TadosCatFeeding.UserManagement;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
+using TadosCatFeeding.UserManagement.PasswordProtection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace TadosCatFeeding
 {
@@ -23,11 +32,27 @@ namespace TadosCatFeeding
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            var unitOfWork = new UnitOfWork(Configuration.GetConnectionString("PetFeedingDB"));
-            services.AddScoped(userEntrance => new UserEntrance(unitOfWork));
-            services.AddScoped(userCRUDservice => new UserCRUDService(unitOfWork));
-             
+            services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
+            var userRepository = new UserRepository(Configuration.GetConnectionString("PetFeedingDB"), new HashWithSaltProtector(10));
+            var catRepository = new CatRepository(Configuration.GetConnectionString("PetFeedingDB"));
+            var statisticRepository = new StatisticRepository(Configuration.GetConnectionString("PetFeedingDB"));
+            var catSharingRepository = new CatSharingRepository(Configuration.GetConnectionString("PetFeedingDB"));
+            var catFeedingRepository = new CatFeedingRepository(Configuration.GetConnectionString("PetFeedingDB"));
+            var statisticCalculation = new StatisticCalculation(Configuration.GetConnectionString("PetFeedingDB"));
+
+            services.AddScoped<IUserEntrance>(userEntrance => new UserEntrance(userRepository, new HashWithSaltProtector(10)));
+            services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10)));
+            services.AddScoped<IStatisticCalculation>(statistiCalculation => statisticCalculation);
+            services.AddScoped<IStatisticCRUDService>(statisticCRUDService => new StatisticCRUDService(statisticRepository, statisticCalculation));
+            services.AddScoped<ICatSharingService>(catSharingService => new CatSharingService(catSharingRepository, catRepository, userRepository));
+            services.AddScoped<ICatCRUDService>(catCRUDService => new CatCRUDService(catRepository, catSharingRepository, userRepository));
+            services.AddScoped<ICatFeedingService>(catFeedingService => new CatFeedingService(catFeedingRepository, catRepository, userRepository, catSharingRepository));
+            services.AddScoped<IServiceResultStatusToResponseConverter>(responseConverter => new ServiceResultCodeToResponseConverter());
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
@@ -35,11 +60,11 @@ namespace TadosCatFeeding
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
-                            ValidIssuer = AuthOptions.ISSUER,
+                            ValidIssuer = "TaskServer",
                             ValidateAudience = true,
-                            ValidAudience = AuthOptions.AUDIENCE,
+                            ValidAudience = "http://localhost:44338/",
                             ValidateLifetime = true,
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("UNBELIEVABLEsecretKEEEEEYYYYYY!!!!!=)")),
                             ValidateIssuerSigningKey = true,
                         };
                     });
@@ -58,7 +83,7 @@ namespace TadosCatFeeding
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tados Test Task");
             });
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

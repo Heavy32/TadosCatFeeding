@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using TadosCatFeeding.CatManagement;
 using TadosCatFeeding.CatSharingManagement;
 using TadosCatFeeding.UserManagement;
@@ -11,38 +12,26 @@ namespace TadosCatFeeding.Controllers
     [ApiController]
     public class CatController : ControllerBase
     {
-        private readonly IContext context;
+        private readonly ICatCRUDService catService;
+        private readonly IServiceResultStatusToResponseConverter responseConverter;
 
-        public CatController(IContext context)
+        public CatController(ICatCRUDService catService, IServiceResultStatusToResponseConverter responseConverter)
         {
-            this.context = context;
+            this.catService = catService;
+            this.responseConverter = responseConverter;
         }
 
         [HttpPost("~/users/{userId}/cats")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(string catName, int userId)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Create(CatInputFromResponseModel catName, int userId)
         {
-            UserModel user = context.UserRepository.Get(userId);
-            if(user == null)
-            {
-                return NotFound();
-            }
+            //how to hide?
+            //if (user.Login != User.Identity.Name || !User.IsInRole("Admin"))
+            //{
+            //    return Forbid("You have no permission to create a cat for another user");
+            //}
 
-            if (user.Login != User.Identity.Name || !User.IsInRole("Admin"))
-            {
-                return Forbid("You have no permission to create a cat for another user");
-            }
-
-            CatModel cat = new CatModel
-            {
-                OwnerId = userId,
-                Name = catName
-            };
-
-            int catId = context.CatRepository.Create(cat);
-            context.CatSharingRepository.Create(new CatSharingModel { CatId = catId, UserId = userId });
-
-            return Created("Get method is not implemented", catId);
+            return responseConverter.GetResponse(catService.Create(new CatCreateModel(catName.Name, userId)));
         }
     }    
 }

@@ -1,9 +1,15 @@
-﻿using TadosCatFeeding.Abstractions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace TadosCatFeeding.CatManagement
 {
-    public interface ICatRepository : IRepository<CatModel>
+    public interface ICatRepository
     {
-        
+        public int Create(CatCreateModel info);
+        public CatModel Get(int id);
+
     }
 }

@@ -2,12 +2,19 @@
 
 namespace TadosCatFeeding.CatManagement
 {
-    public class CatModel
+    public class CatModel : IUniqueModel
     {
-        public int Id { get; set; }
+        public int Id { get; }
         [Required(ErrorMessage = "Pet's name is required")]
-        public string Name { get; set; }
+        public string Name { get; }
         [Required(ErrorMessage = "Pet should have an owner!")]
-        public int OwnerId { get; set; }
+        public int OwnerId { get; }
+
+        public CatModel(int id, string name, int ownerId)
+        {
+            Id = id;
+            Name = name;
+            OwnerId = ownerId;
+        }
     }
 }

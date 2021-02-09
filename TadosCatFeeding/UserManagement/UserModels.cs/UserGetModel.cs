@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace TadosCatFeeding.UserManagement
 {
-    public class NewUserInfo
+    public class UserGetModel : IUniqueModel
     {
-        
+        public int Id { get; set; }
+        public string Login { get; set; }
+        public string NickName { get; set; }
     }
 }
