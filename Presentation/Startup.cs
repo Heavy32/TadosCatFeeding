@@ -20,8 +20,7 @@ using Services.StatisticProvision;
 using Services.CatSharingManagement;
 using Services.CatManagement;
 using Services.CatFeedingManagement;
-using Service;
-using Service.UserManagement.PasswordProtection;
+using Services.UserManagement.PasswordProtection;
 
 namespace TadosCatFeeding
 {
@@ -48,7 +47,7 @@ namespace TadosCatFeeding
             var catFeedingRepository = new CatFeedingRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var statisticCalculation = new StatisticCalculation(Configuration.GetConnectionString("PetFeedingDB"));
 
-            services.AddScoped<IUserEntrance>(userEntrance => new UserEntranceProvider(userRepository, new HashWithSaltProtector(10)));
+            services.AddScoped<IUserEntrance>(userEntrance => new UserEntranceProvider(userRepository, new HashWithSaltProtector(10), new Mapper()));
             services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10), new Mapper()));
             services.AddScoped<IStatisticCalculation>(statistiCalculation => statisticCalculation);
             services.AddScoped<IStatisticService>(statisticCRUDService => new StatisticService(statisticRepository, statisticCalculation, new Mapper()));
