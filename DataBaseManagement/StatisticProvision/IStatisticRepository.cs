@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.StatisticProvision
+namespace DataBaseManagement.StatisticProvision
 {
     public interface IStatisticRepository
     {
-        public int Create(StatisticModel info);
-        public StatisticModel Get(int id);
-        public List<StatisticModel> GetAll();
+        public int Create(StatisticInDbModel info);
+        public StatisticInDbModel Get(int id);
+        public List<StatisticInDbModel> GetAll();
     }
 }

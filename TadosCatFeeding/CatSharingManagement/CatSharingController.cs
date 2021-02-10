@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.CatSharingManagement;
-using TadosCatFeeding.UserManagement;
+using Services;
+using Services.CatSharingManagement;
 
-namespace TadosCatFeeding.PetSharingManagement
+namespace Presentation.PetSharingManagement
 {
     [Route("[controller]")]
     [ApiController]
@@ -24,7 +23,7 @@ namespace TadosCatFeeding.PetSharingManagement
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Share(int userId, int catId, int UserToShare)
         {
-            return responseConverter.GetResponse(catSharingService.Share(new CatUserLink(catId, UserToShare), userId));
+            return responseConverter.GetResponse(catSharingService.Share(new CatSharingCreateModel(catId, UserToShare), userId));
         }
     }
 }

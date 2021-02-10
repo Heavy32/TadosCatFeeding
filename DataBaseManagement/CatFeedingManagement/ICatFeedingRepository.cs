@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TadosCatFeeding.CatFeedingManagement
+namespace DataBaseManagement.CatFeedingManagement
 {
     public interface ICatFeedingRepository
     {
-        public int Create(CatFeedingCreateModel info);
+        public int Create(CatFeedingCreateInDbModel info);
         public List<DateTime> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish);
-
     }
 }

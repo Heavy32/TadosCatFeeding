@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 
-namespace TadosCatFeeding.StatisticProvision
+namespace DataBaseManagement.StatisticProvision
 {
     public class StatisticCalculation : IStatisticCalculation
     {

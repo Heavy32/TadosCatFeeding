@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TadosCatFeeding.UserManagement;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Services.UserManagement;
+using Services;
+using Presentation.UserManagement;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace TadosCatFeeding.Controllers
+namespace Presentation.Controllers
 {
     [Route("users")]
     [ApiController]
@@ -17,19 +17,24 @@ namespace TadosCatFeeding.Controllers
         private readonly IUserEntrance userEntrance;
         private readonly IUserCRUDService userCRUDService;
         private readonly IServiceResultStatusToResponseConverter responseConverter;
+        private readonly IMapper mapper;
 
-        public UserController(IUserEntrance userEntrance, IUserCRUDService userCRUDService, IServiceResultStatusToResponseConverter responseConverter)
+        public UserController(IUserEntrance userEntrance, IUserCRUDService userCRUDService, IServiceResultStatusToResponseConverter responseConverter, IMapper mapper)
         {
             this.userEntrance = userEntrance;
             this.userCRUDService = userCRUDService;
             this.responseConverter = responseConverter;
+            this.mapper = mapper;
         }
         
         [HttpPost]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(UserCreateModel user)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Create(UserCreateViewModel user)
         {
-            return responseConverter.GetResponse(userCRUDService.Create(user), Request.Path.Value);
+            return responseConverter.
+                GetResponse(
+                userCRUDService.Create(
+                    mapper.Map<UserCreateModel, UserCreateViewModel>(user)), Request.Path.Value);
         }
 
         [HttpGet]
@@ -40,24 +45,27 @@ namespace TadosCatFeeding.Controllers
         }
 
         [HttpGet("{id:int}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Get(int id)
         {         
             return responseConverter.GetResponse(userCRUDService.Get(id));
         }
 
         [HttpDelete("{id:int}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Delete(int id)
         {
             return responseConverter.GetResponse(userCRUDService.Delete(id));
         }
 
         [HttpPatch("{id}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Update(int id, UserUpdateModel newUserInfo)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Update(int id, UserUpdateViewModel newUserInfo)
         {
-            return responseConverter.GetResponse(userCRUDService.Update(id, newUserInfo));
+            return responseConverter.
+                GetResponse(
+                userCRUDService.Update(
+                    id, mapper.Map<UserUpdateModel, UserUpdateViewModel>(newUserInfo)));
         }
 
         private (string user, string password) ExtractCredentials(HttpRequest request)

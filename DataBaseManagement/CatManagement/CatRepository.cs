@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace TadosCatFeeding.CatManagement
+namespace DataBaseManagement.CatManagement
 {
     public class CatRepository : Repository, ICatRepository
     {
@@ -9,7 +9,7 @@ namespace TadosCatFeeding.CatManagement
         {
         }
 
-        public int Create(CatCreateModel info)
+        public int Create(CatCreateInDbModel info)
         {
             return (int)ExecuteWithOutResult(
                  $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
@@ -26,7 +26,7 @@ namespace TadosCatFeeding.CatManagement
                     });
         }
 
-        public CatModel Get(int id)
+        public CatInDbModel Get(int id)
         {
             return ReturnCustomItem(
                 $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
@@ -34,10 +34,10 @@ namespace TadosCatFeeding.CatManagement
                 new SqlParameter("@id", id));
         }
 
-        private CatModel ReturnCat(SqlDataReader reader)
+        private CatInDbModel ReturnCat(SqlDataReader reader)
         {
             var cat = reader.Read()
-            ? new CatModel(
+            ? new CatInDbModel(
                 (int)reader["Id"],
                 (string)reader["Name"],
                 (int)reader["Owner_Id"])

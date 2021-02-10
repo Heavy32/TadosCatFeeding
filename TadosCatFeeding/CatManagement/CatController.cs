@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.CatSharingManagement;
-using TadosCatFeeding.UserManagement;
+﻿using Microsoft.AspNetCore.Mvc;
+using Services;
+using Services.CatManagement;
 
-namespace TadosCatFeeding.Controllers
+namespace Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
@@ -23,7 +19,7 @@ namespace TadosCatFeeding.Controllers
 
         [HttpPost("~/users/{userId}/cats")]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(CatInputFromResponseModel catName, int userId)
+        public IActionResult Create(CatCreateViewModel cat, int userId)
         {
             //how to hide?
             //if (user.Login != User.Identity.Name || !User.IsInRole("Admin"))
@@ -31,7 +27,7 @@ namespace TadosCatFeeding.Controllers
             //    return Forbid("You have no permission to create a cat for another user");
             //}
 
-            return responseConverter.GetResponse(catService.Create(new CatCreateModel(catName.Name, userId)));
+            return responseConverter.GetResponse(catService.Create(new CatCreateServiceModel(cat.Name, userId)));
         }
     }    
 }

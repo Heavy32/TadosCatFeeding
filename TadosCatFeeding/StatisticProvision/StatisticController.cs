@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.StatisticProvision;
-using TadosCatFeeding.UserManagement;
+﻿using Microsoft.AspNetCore.Mvc;
+using Services;
+using Services.StatisticProvision;
 
-namespace TadosCatFeeding.Controllers
+namespace Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
@@ -33,30 +28,5 @@ namespace TadosCatFeeding.Controllers
         {
             return responseConverter.GetResponse(statisticService.GetAll());   
         }
-
-        //shouldn't be here
-    //    [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
-    //    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //    public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
-    //    {
-    //        UserModel user = context.UserRepository.Get(userId);
-    //        if (user == null)
-    //        {
-    //            return NotFound("User cannot be found");
-    //        }
-
-    //        CatModel cat = context.CatRepository.Get(catId);
-    //        if (cat == null)
-    //        {
-    //            return NotFound("Cat cannot be found");
-    //        }
-
-    //        if (user.Login != User.Identity.Name)
-    //        {
-    //            return Forbid();
-    //        }
-
-    //        return Ok(context.StatisticRepository.GetFeedingForPeriod(userId, catId, start, finish));
-    //    }
     }
 }

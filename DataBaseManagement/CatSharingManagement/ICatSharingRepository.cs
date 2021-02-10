@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.CatSharingManagement
+namespace DataBaseManagement.CatSharingManagement
 {
     public interface ICatSharingRepository
     {
-        public int Create(CatUserLink info);
+        public int Create(CatSharingCreateInDbModel info);
         public bool IsPetSharedWithUser(int userId, int petId);
     }
 }

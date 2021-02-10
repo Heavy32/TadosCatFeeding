@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TadosCatFeeding.CatManagement
+﻿namespace DataBaseManagement.CatManagement
 {
     public interface ICatRepository
     {
-        public int Create(CatCreateModel info);
-        public CatModel Get(int id);
-
+        public int Create(CatCreateInDbModel info);
+        public CatInDbModel Get(int id);
     }
 }

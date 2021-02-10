@@ -7,17 +7,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using TadosCatFeeding.CatFeedingManagement;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.CatSharingManagement;
-using TadosCatFeeding.StatisticProvision;
-using TadosCatFeeding.UserManagement;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System.Text.Json.Serialization;
-using TadosCatFeeding.UserManagement.PasswordProtection;
-using System.Security.Cryptography;
 using System.Text;
+using DataBaseManagement.UserManagement;
+using DataBaseManagement.CatManagement;
+using DataBaseManagement.StatisticProvision;
+using DataBaseManagement.CatSharingManagement;
+using DataBaseManagement.CatFeedingManagement;
+using Services.UserManagement;
+using Services;
+using Services.StatisticProvision;
+using Services.CatSharingManagement;
+using Services.CatManagement;
+using Services.CatFeedingManagement;
+using Service;
+using Service.UserManagement.PasswordProtection;
 
 namespace TadosCatFeeding
 {
@@ -37,20 +41,20 @@ namespace TadosCatFeeding
                 opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            var userRepository = new UserRepository(Configuration.GetConnectionString("PetFeedingDB"), new HashWithSaltProtector(10));
+            var userRepository = new UserRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var catRepository = new CatRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var statisticRepository = new StatisticRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var catSharingRepository = new CatSharingRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var catFeedingRepository = new CatFeedingRepository(Configuration.GetConnectionString("PetFeedingDB"));
             var statisticCalculation = new StatisticCalculation(Configuration.GetConnectionString("PetFeedingDB"));
 
-            services.AddScoped<IUserEntrance>(userEntrance => new UserEntrance(userRepository, new HashWithSaltProtector(10)));
-            services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10)));
+            services.AddScoped<IUserEntrance>(userEntrance => new UserEntranceProvider(userRepository, new HashWithSaltProtector(10)));
+            services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10), new Mapper()));
             services.AddScoped<IStatisticCalculation>(statistiCalculation => statisticCalculation);
-            services.AddScoped<IStatisticService>(statisticCRUDService => new StatisticService(statisticRepository, statisticCalculation));
-            services.AddScoped<ICatSharingService>(catSharingService => new CatSharingService(catSharingRepository, catRepository, userRepository));
-            services.AddScoped<ICatCRUDService>(catCRUDService => new CatCRUDService(catRepository, catSharingRepository, userRepository));
-            services.AddScoped<ICatFeedingService>(catFeedingService => new CatFeedingService(catFeedingRepository, catRepository, userRepository, catSharingRepository));
+            services.AddScoped<IStatisticService>(statisticCRUDService => new StatisticService(statisticRepository, statisticCalculation, new Mapper()));
+            services.AddScoped<ICatSharingService>(catSharingService => new CatSharingService(catSharingRepository, catRepository, userRepository, new Mapper()));
+            services.AddScoped<ICatCRUDService>(catCRUDService => new CatCRUDService(catRepository, catSharingRepository, userRepository, new Mapper()));
+            services.AddScoped<ICatFeedingService>(catFeedingService => new CatFeedingService(catFeedingRepository, catRepository, userRepository, catSharingRepository, new Mapper()));
             services.AddScoped<IServiceResultStatusToResponseConverter>(responseConverter => new ServiceResultCodeToResponseConverter());
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

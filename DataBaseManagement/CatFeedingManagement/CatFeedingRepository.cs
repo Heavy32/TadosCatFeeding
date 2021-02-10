@@ -1,9 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Microsoft.Data.SqlClient;
 
-namespace TadosCatFeeding.CatFeedingManagement
+namespace DataBaseManagement.CatFeedingManagement
 {
     public class CatFeedingRepository : Repository, ICatFeedingRepository
     {
@@ -11,7 +11,7 @@ namespace TadosCatFeeding.CatFeedingManagement
         {
         }
 
-        public int Create(CatFeedingCreateModel info)
+        public int Create(CatFeedingCreateInDbModel info)
         {
             return (int)ExecuteWithOutResult(
                 "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time) VALUES (@user_Id, @pet_Id, @feed_Time); SET @id=SCOPE_IDENTITY();",
@@ -33,7 +33,7 @@ namespace TadosCatFeeding.CatFeedingManagement
         {
             List<DateTime> info = new List<DateTime>();
 
-            List<CatFeedingModel> feeds = ReturnListCustomItems(
+            List<CatFeedingInDbModel> feeds = ReturnListCustomItems(
                 "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
                 ReturnFeeding,
                 new SqlParameter[]
@@ -52,11 +52,11 @@ namespace TadosCatFeeding.CatFeedingManagement
             return info;
         }
 
-        private CatFeedingModel ReturnFeeding(SqlDataReader reader)
+        private CatFeedingInDbModel ReturnFeeding(SqlDataReader reader)
         {
             if (reader.Read())
             {
-                return new CatFeedingModel(
+                return new CatFeedingInDbModel(
                     (int)reader["Id"],
                     (int)reader["User_Id"],
                     (int)reader["Owner_Id"],

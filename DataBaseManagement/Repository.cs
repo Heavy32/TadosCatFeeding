@@ -1,11 +1,10 @@
-﻿using AutoMapper;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace TadosCatFeeding
+namespace DataBaseManagement
 {
     public abstract class Repository
     {
@@ -26,14 +25,14 @@ namespace TadosCatFeeding
             {
                 connection.Open();
 
-                SqlTransaction transaction = connection.BeginTransaction();
+                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
                 command.Transaction = transaction;
                 try
                 {
                     item = function.Invoke(command.ExecuteReader());
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     transaction.Rollback();
                 }
@@ -51,6 +50,7 @@ namespace TadosCatFeeding
                 connection.Open();
 
                 SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
+                command.Transaction = transaction;
                 try
                 {
                     SqlDataReader reader = command.ExecuteReader();
@@ -60,7 +60,7 @@ namespace TadosCatFeeding
                     }
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     transaction.Rollback();
                 }
@@ -84,9 +84,8 @@ namespace TadosCatFeeding
                     command.ExecuteNonQuery();
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine(ex.Message);
                     transaction.Rollback();
                 }
             }
@@ -117,13 +116,6 @@ namespace TadosCatFeeding
                 }
             }
             return result;
-        }
-
-        public Tdestination Map<Tdestination, TSource>(TSource model)
-        {
-            var config = new MapperConfiguration(config => config.CreateMap(typeof(TSource), typeof(Tdestination)));
-            var mapper = new Mapper(config);
-            return mapper.Map<Tdestination>(model);
         }
 
         private SqlCommand CreateCommand(string sqlExpression, params SqlParameter[] parameters)

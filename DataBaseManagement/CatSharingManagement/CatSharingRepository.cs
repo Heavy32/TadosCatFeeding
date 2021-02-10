@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace TadosCatFeeding.CatSharingManagement
+namespace DataBaseManagement.CatSharingManagement
 {
     public class CatSharingRepository : Repository, ICatSharingRepository
     {
@@ -10,7 +10,7 @@ namespace TadosCatFeeding.CatSharingManagement
         {
         }
 
-        public int Create(CatUserLink info)
+        public int Create(CatSharingCreateInDbModel info)
         {
             return (int)ExecuteWithOutResult(
                 "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id); SET @id=SCOPE_IDENTITY();",
@@ -29,7 +29,7 @@ namespace TadosCatFeeding.CatSharingManagement
 
         public bool IsPetSharedWithUser(int userId, int petId)
         {
-            CatUserLink link = ReturnCustomItem(
+            CatSharingCreateInDbModel link = ReturnCustomItem(
                 "SELECT User_Id, Pet_Id FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;",
                     ReturnLink,
                     new SqlParameter[]
@@ -41,10 +41,10 @@ namespace TadosCatFeeding.CatSharingManagement
             return link != null;
         }
 
-        private CatUserLink ReturnLink(SqlDataReader reader)
+        private CatSharingCreateInDbModel ReturnLink(SqlDataReader reader)
         {
-            CatUserLink link = reader.Read()
-                ? new CatUserLink(
+            CatSharingCreateInDbModel link = reader.Read()
+                ? new CatSharingCreateInDbModel(
                     (int)reader["User_Id"],
                     (int)reader["Pet_Id"])
                 : null;

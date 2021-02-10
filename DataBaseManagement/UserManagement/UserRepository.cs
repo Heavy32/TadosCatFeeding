@@ -1,19 +1,16 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
-using TadosCatFeeding.UserManagement.PasswordProtection;
 
-namespace TadosCatFeeding.UserManagement
+namespace DataBaseManagement.UserManagement
 {
     public class UserRepository : Repository, IUserRepository
     {
-        private readonly HashWithSaltProtector protection;
-
-        public UserRepository(string connectionString, HashWithSaltProtector protection) : base(connectionString)
+        public UserRepository(string connectionString) : base(connectionString)
         {
-            this.protection = protection;
+
         }
 
-        public UserInDB GetUserByLogin(string login)
+        public UserInDbModel GetUserByLogin(string login)
         {
             return ReturnCustomItem(
                 "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Login = @login",
@@ -24,7 +21,7 @@ namespace TadosCatFeeding.UserManagement
                 });
         }        
 
-        public int Create(UserInDB info)
+        public int Create(UserInDbModel info)
         {            
             int id = (int)ExecuteWithOutResult(
                 "INSERT INTO Users (Login, Nickname, Role, Salt, HashedPassword) VALUES (@Login, @Nickname, @Role, @Salt, @Password); SET @id=SCOPE_IDENTITY();",
@@ -56,7 +53,7 @@ namespace TadosCatFeeding.UserManagement
                 });
         }
 
-        public UserInDB Get(int id)
+        public UserInDbModel Get(int id)
         {
             return ReturnCustomItem(
                 "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Id = @id",
@@ -67,7 +64,7 @@ namespace TadosCatFeeding.UserManagement
                 });
         }
 
-        public void Update(int id, UserInDB info)
+        public void Update(int id, UserInDbModel info)
         {
             Execute(
                 "UPDATE Users SET Login = @login, Salt = @Salt, HashedPassword = @password, Nickname = @nickname, Role = @role WHERE Id = @id;",
@@ -82,10 +79,10 @@ namespace TadosCatFeeding.UserManagement
                     });
         }
 
-        private UserInDB ReturnUser(SqlDataReader reader)
+        private UserInDbModel ReturnUser(SqlDataReader reader)
         {
-            UserInDB user = reader.Read()
-                ? new UserInDB(
+            UserInDbModel user = reader.Read()
+                ? new UserInDbModel(
                     (int)reader["Id"],
                     (string)reader["Login"],
                     (string)reader["Nickname"],

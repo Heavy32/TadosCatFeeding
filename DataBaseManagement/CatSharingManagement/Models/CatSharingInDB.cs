@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.CatSharingManagement.CatSharingModels
+namespace DataBaseManagement.CatSharingManagement.CatSharingModels
 {
     public class CatSharingInDB
     {

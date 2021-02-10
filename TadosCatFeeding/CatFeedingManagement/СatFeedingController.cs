@@ -1,10 +1,7 @@
 ﻿using System;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TadosCatFeeding.CatFeedingManagement;
-using TadosCatFeeding.CatManagement;
-using TadosCatFeeding.CatSharingManagement;
-using TadosCatFeeding.UserManagement;
+using Services;
+using Services.CatFeedingManagement;
 
 namespace TadosCatFeeding.PetFeedingManagement
 {
@@ -25,7 +22,14 @@ namespace TadosCatFeeding.PetFeedingManagement
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Feed(int userId, int catId, DateTime feedingTime)
         {
-            return responseConverter.GetResponse(catFeedingService.Feed(new CatFeedingCreateModel(catId, userId, DateTime.Now)));
+            return responseConverter.GetResponse(catFeedingService.Feed(new CatFeedingCreateModel(catId, userId, feedingTime)));
+        }
+
+        [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        {
+            return responseConverter.GetResponse(catFeedingService.GetFeedingForPeriod(userId, catId, start, finish));
         }
     }
 }

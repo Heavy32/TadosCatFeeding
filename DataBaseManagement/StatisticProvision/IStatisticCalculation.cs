@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.StatisticProvision
+namespace DataBaseManagement.StatisticProvision
 {
     public interface IStatisticCalculation
     {

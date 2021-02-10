@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 
-namespace TadosCatFeeding.StatisticProvision
+namespace DataBaseManagement.StatisticProvision
 {
     public class StatisticRepository : Repository, IStatisticRepository
     {
@@ -10,7 +10,7 @@ namespace TadosCatFeeding.StatisticProvision
         {
         }
 
-        public int Create(StatisticModel info)
+        public int Create(StatisticInDbModel info)
         {
             return (int)ExecuteWithOutResult(
                 "INSERT INTO Statistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression); SET @id=SCOPE_IDENTITY();",
@@ -28,7 +28,7 @@ namespace TadosCatFeeding.StatisticProvision
                     });
         }
 
-        public StatisticModel Get(int id)
+        public StatisticInDbModel Get(int id)
         {
             return ReturnCustomItem(
                 "SELECT Name, Description, SqlExpression FROM Statistics WHERE Id = @id",
@@ -39,7 +39,7 @@ namespace TadosCatFeeding.StatisticProvision
                 });
         }
 
-        public List<StatisticModel> GetAll()
+        public List<StatisticInDbModel> GetAll()
         {
             return ReturnListCustomItems(
                 "SELECT Name, Description, SqlExpression FROM Statistics",
@@ -47,11 +47,11 @@ namespace TadosCatFeeding.StatisticProvision
                 new SqlParameter[] { });
         }
 
-        private StatisticModel ReturnStatistic(SqlDataReader reader)
+        private StatisticInDbModel ReturnStatistic(SqlDataReader reader)
         {
             if (reader.Read())
             {
-                return new StatisticModel(
+                return new StatisticInDbModel(
                     (int)reader["Id"],
                     (string)reader["Name"],
                     (string)reader["Description"],

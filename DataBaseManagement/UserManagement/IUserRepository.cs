@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TadosCatFeeding.UserManagement
+namespace DataBaseManagement.UserManagement
 {
     public interface IUserRepository
     {
-        public UserInDB GetUserByLogin(string login);
-        public int Create(UserInDB info);
+        public UserInDbModel GetUserByLogin(string login);
+        public int Create(UserInDbModel info);
         public void Delete(int id);
-        public UserInDB Get(int id);
-        public void Update(int id, UserInDB info);
+        public UserInDbModel Get(int id);
+        public void Update(int id, UserInDbModel info);
     }
 }
