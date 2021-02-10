@@ -11,10 +11,11 @@ namespace Services.UserManagement
         private readonly IPasswordProtector<HashedPasswordWithSalt> protection;
         private readonly IMapper mapper;
 
-        public UserEntranceProvider(UserRepository database, IPasswordProtector<HashedPasswordWithSalt> protection)
+        public UserEntranceProvider(IUserRepository database, IPasswordProtector<HashedPasswordWithSalt> protection, IMapper mapper)
         {
             this.database = database;
             this.protection = protection;
+            this.mapper = mapper;
         }
 
         public ServiceResult<TokenJwt> LogIn(string login, string password)
