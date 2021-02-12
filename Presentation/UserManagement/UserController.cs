@@ -26,9 +26,13 @@ namespace Presentation.Controllers
             this.responseConverter = responseConverter;
             this.mapper = mapper;
         }
-        
+
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(typeof(UserServiceModel), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
         public IActionResult Create(UserCreateViewModel user)
         {
             return responseConverter.
@@ -38,6 +42,8 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(TokenJwt), 200)]
+        [ProducesResponseType(401)]
         public IActionResult LogIn()
         {
             (string login, string password) = ExtractCredentials(Request);
@@ -46,6 +52,10 @@ namespace Presentation.Controllers
 
         [HttpGet("{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
         public IActionResult Get(int id)
         {         
             return responseConverter.GetResponse(userCRUDService.Get(id));
@@ -53,26 +63,36 @@ namespace Presentation.Controllers
 
         [HttpDelete("{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(401)]
         public IActionResult Delete(int id)
         {
-            return responseConverter.GetResponse(userCRUDService.Delete(id));
+            return responseConverter.GetResponse(userCRUDService.Delete(id, User.Claims));
         }
 
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(401)]
         public IActionResult Update(int id, UserUpdateViewModel newUserInfo)
         {
             return responseConverter.
                 GetResponse(
                 userCRUDService.Update(
-                    id, mapper.Map<UserUpdateModel, UserUpdateViewModel>(newUserInfo)));
+                    id, mapper.Map<UserUpdateModel, UserUpdateViewModel>(newUserInfo),
+                    User.Claims));
         }
 
         private (string user, string password) ExtractCredentials(HttpRequest request)
         {
             string authHeader = request.Headers["Authorization"];
 
-            string encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
+            string encodedUsernamePassword = authHeader["Basic ".Length..].Trim();
 
             Encoding encoding = Encoding.GetEncoding("iso-8859-1");
             string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));

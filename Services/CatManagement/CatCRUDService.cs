@@ -1,7 +1,11 @@
 ﻿using DataBaseManagement.CatManagement;
 using DataBaseManagement.CatSharingManagement;
 using DataBaseManagement.UserManagement;
-using Services;
+using Services.UserManagement;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Services.CatManagement
 {
@@ -20,8 +24,19 @@ namespace Services.CatManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<CatServiceModel> Create(CatCreateServiceModel info)
+        public ServiceResult<CatServiceModel> Create(CatCreateServiceModel info, IEnumerable<Claim> userClaims)
         {
+            int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
+
+            if (userId != info.OwnerId)
+            {
+                if (userRole != Roles.Admin)
+                {
+                    return new ServiceResult<CatServiceModel>(ServiceResultStatus.ActionNotAllowed, "You cannot create cat for this user");
+                }
+            }
+
             UserInDbModel user = userDatabase.Get(info.OwnerId);
             if (user == null)
             {

@@ -21,6 +21,10 @@ namespace Presentation.PetSharingManagement
 
         [HttpPut("~/users/{userId}/cats/{catId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public IActionResult Share(int userId, int catId, int UserToShare)
         {
             return responseConverter.GetResponse(catSharingService.Share(new CatSharingCreateModel(catId, UserToShare), userId));

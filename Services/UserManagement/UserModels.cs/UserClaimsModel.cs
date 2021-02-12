@@ -8,11 +8,13 @@ namespace Services.UserManagement
 {
     public class UserClaimsModel
     {
+        public int Id { get; }
         public string Login { get; }
         public string Role { get; }
 
-        public UserClaimsModel(string login, string role)
+        public UserClaimsModel(int id, string login, string role)
         {
+            Id = id;
             Login = login;
             Role = role;
         }

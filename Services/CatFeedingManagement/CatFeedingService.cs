@@ -41,7 +41,7 @@ namespace Services.CatFeedingManagement
 
             if (!catSharingDatabase.IsPetSharedWithUser(info.UserId, info.CatId))
             {
-                return new ServiceResult<CatFeedingModel>(ServiceResultStatus.PetIsNotShared, "You cannot feed this cat");
+                return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ActionNotAllowed, "You cannot feed this cat");
             }
 
             catFeedingdatabase.Create(mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(info));

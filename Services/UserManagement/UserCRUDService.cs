@@ -1,5 +1,9 @@
 ﻿using DataBaseManagement.UserManagement;
 using Services.UserManagement.PasswordProtection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Services.UserManagement
 {
@@ -28,18 +32,19 @@ namespace Services.UserManagement
             return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemRecieved, mapper.Map<UserGetModel, UserInDbModel>(userInDb));
         }
 
-        public ServiceResult<UserServiceModel> Create(UserCreateModel info)
+        public ServiceResult<UserServiceModel> Update(int id, UserUpdateModel info, IEnumerable<Claim> userClaims)
         {
-            HashedPasswordWithSalt hashSalt = protector.ProtectPassword(info.Password);
+            int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
 
-            UserInDbModel userInDB = new UserInDbModel(0, info.Login, info.Nickname, (int)info.Role, hashSalt.Salt, hashSalt.Password);
+            if (userId != id)
+            {
+                if (userRole != Roles.Admin)
+                {
+                    return new ServiceResult<UserServiceModel>(ServiceResultStatus.ActionNotAllowed, "You cannot update this user");
+                }
+            }
 
-            int userId = database.Create(userInDB);
-            return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemCreated, new UserServiceModel(userId, info.Login, info.Password, info.Nickname, info.Role));
-        }
-
-        public ServiceResult<UserServiceModel> Update(int id, UserUpdateModel info)
-        {
             UserInDbModel user = database.Get(id);
             if (user == null)
             {
@@ -63,8 +68,19 @@ namespace Services.UserManagement
             return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemChanged);
         }
 
-        public ServiceResult<UserServiceModel> Delete(int id)
+        public ServiceResult<UserServiceModel> Delete(int id, IEnumerable<Claim> userClaims)
         {
+            int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
+           
+            if(userId != id)
+            {
+                if(userRole != Roles.Admin)
+                {
+                    return new ServiceResult<UserServiceModel>(ServiceResultStatus.ActionNotAllowed, "You cannot delete this user");
+                }
+            }
+            
             UserInDbModel user = database.Get(id);
             if (user == null)
             {

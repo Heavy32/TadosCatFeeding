@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.CatManagement;
 
@@ -18,16 +20,15 @@ namespace Presentation.Controllers
         }
 
         [HttpPost("~/users/{userId}/cats")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Create(CatCreateViewModel cat, int userId)
         {
-            //how to hide?
-            //if (user.Login != User.Identity.Name || !User.IsInRole("Admin"))
-            //{
-            //    return Forbid("You have no permission to create a cat for another user");
-            //}
-
-            return responseConverter.GetResponse(catService.Create(new CatCreateServiceModel(cat.Name, userId)));
+            return responseConverter.GetResponse(catService.Create(new CatCreateServiceModel(cat.Name, userId), User.Claims));
         }
     }    
 }

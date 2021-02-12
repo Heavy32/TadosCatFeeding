@@ -22,7 +22,7 @@ using Services.CatManagement;
 using Services.CatFeedingManagement;
 using Services.UserManagement.PasswordProtection;
 
-namespace TadosCatFeeding
+namespace Presentation
 {
     public class Startup
     {
@@ -55,6 +55,7 @@ namespace TadosCatFeeding
             services.AddScoped<ICatCRUDService>(catCRUDService => new CatCRUDService(catRepository, catSharingRepository, userRepository, new Mapper()));
             services.AddScoped<ICatFeedingService>(catFeedingService => new CatFeedingService(catFeedingRepository, catRepository, userRepository, catSharingRepository, new Mapper()));
             services.AddScoped<IServiceResultStatusToResponseConverter>(responseConverter => new ServiceResultCodeToResponseConverter());
+            services.AddScoped<IMapper>(Mapper => new Mapper());
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
@@ -81,7 +82,10 @@ namespace TadosCatFeeding
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSwagger();
+            app.UseSwagger(c =>
+            {
+                c.SerializeAsV2 = true;
+            });
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tados Test Task");

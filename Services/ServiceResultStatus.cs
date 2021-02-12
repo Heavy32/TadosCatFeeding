@@ -2,7 +2,6 @@
 {
     public enum ServiceResultStatus
     {
-        PetIsNotShared,
         PetIsShared,
         CantShareWithUser,
         IncorrectLoginPassword,
@@ -12,6 +11,7 @@
         ItemRecieved,
         ItemNotFound,
         ItemIsNotCreated,
-        NoContent
+        NoContent,
+        ActionNotAllowed
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.CatFeedingManagement;
 
-namespace TadosCatFeeding.PetFeedingManagement
+namespace Presentation
 {
     [Route("[controller]")]
     [ApiController]
@@ -19,14 +21,19 @@ namespace TadosCatFeeding.PetFeedingManagement
         }
 
         [HttpPost("~/users/{userId}/cats/{catId}/feedings")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
         public IActionResult Feed(int userId, int catId, DateTime feedingTime)
         {
             return responseConverter.GetResponse(catFeedingService.Feed(new CatFeedingCreateModel(catId, userId, feedingTime)));
         }
 
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
         {
             return responseConverter.GetResponse(catFeedingService.GetFeedingForPeriod(userId, catId, start, finish));

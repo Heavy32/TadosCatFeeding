@@ -17,11 +17,11 @@ namespace Services.UserManagement
 
         public TokenJwt(ClaimsIdentity identity, int tokenDuration, string securityKey, string audience, string issuer)
         {
-            Token = GetToken(identity);
             this.tokenDuration = tokenDuration;
             this.securityKey = securityKey;
             this.audience = audience;
             this.issuer = issuer;
+            Token = GetToken(identity);
         }
 
         private string GetToken(ClaimsIdentity identity)

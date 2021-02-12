@@ -1,6 +1,7 @@
 ﻿using DataBaseManagement.UserManagement;
 using Services.UserManagement.PasswordProtection;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Services.UserManagement
@@ -50,9 +51,11 @@ namespace Services.UserManagement
         {
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, userClaims.Id.ToString()),
                 new Claim(ClaimsIdentity.DefaultNameClaimType, userClaims.Login),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, userClaims.Role),
             };
+
 
             ClaimsIdentity claimsIdentity =
             new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
