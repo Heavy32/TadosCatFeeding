@@ -28,14 +28,24 @@ namespace Services.UserManagement
             {
                 return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
             }
-            
+
             return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemRecieved, mapper.Map<UserGetModel, UserInDbModel>(userInDb));
+        }
+
+        public ServiceResult<UserServiceModel> Create(UserCreateModel info)
+        {
+            HashedPasswordWithSalt hashSalt = protector.ProtectPassword(info.Password);
+
+            UserInDbModel userInDB = new UserInDbModel(0, info.Login, info.Nickname, (int)info.Role, hashSalt.Salt, hashSalt.Password);
+
+            int userId = database.Create(userInDB);
+            return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemCreated, new UserServiceModel(userId, info.Login, info.Password, info.Nickname, info.Role));
         }
 
         public ServiceResult<UserServiceModel> Update(int id, UserUpdateModel info, IEnumerable<Claim> userClaims)
         {
-            int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
-            Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
+            int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value);
+            Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value);
 
             if (userId != id)
             {

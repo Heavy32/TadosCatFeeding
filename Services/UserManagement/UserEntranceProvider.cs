@@ -1,7 +1,6 @@
 ﻿using DataBaseManagement.UserManagement;
 using Services.UserManagement.PasswordProtection;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 
 namespace Services.UserManagement
@@ -27,13 +26,7 @@ namespace Services.UserManagement
                 return new ServiceResult<TokenJwt>(ServiceResultStatus.IncorrectLoginPassword);
             }
 
-            HashedPasswordWithSalt hashSalt = new HashedPasswordWithSalt
-            { 
-                Salt = user.Salt,
-                Password = user.HashedPassword 
-            };
-
-            if (!protection.VerifyPassword(hashSalt, password))
+            if (!protection.VerifyPassword(new HashedPasswordWithSalt { Salt = user.Salt, Password = user.HashedPassword },password))
             {
                 return new ServiceResult<TokenJwt>(ServiceResultStatus.IncorrectLoginPassword);
             }
@@ -55,7 +48,6 @@ namespace Services.UserManagement
                 new Claim(ClaimsIdentity.DefaultNameClaimType, userClaims.Login),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, userClaims.Role),
             };
-
 
             ClaimsIdentity claimsIdentity =
             new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,

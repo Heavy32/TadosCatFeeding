@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace TadosCatFeeding
+namespace Presentation
 {
     public class Program
     {
