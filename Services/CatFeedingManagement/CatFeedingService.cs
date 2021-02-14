@@ -30,7 +30,7 @@ namespace Services.CatFeedingManagement
             CatInDbModel cat = catDatabase.Get(info.CatId);
             if (cat == null)
             {
-                return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ItemNotFound, "Cat cannot be found");
+                return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ItemNotFound, "Cat is not found");
             }
 
             UserInDbModel user = userDatabase.Get(info.UserId);

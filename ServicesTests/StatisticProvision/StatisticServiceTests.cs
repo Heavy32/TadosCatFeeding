@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using Services.StatisticProvision;
 using Moq;
 using DataBaseManagement.StatisticProvision;
 using System.Collections.Generic;
@@ -8,6 +7,28 @@ namespace Services.StatisticProvision.Tests
 {
     public class StatisticServiceTests
     {
+        [Test]
+        public void Execute_Success_Test()
+        {
+            //Arrange
+            var mockStatisticRepository = new Mock<IStatisticRepository>();
+            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
+            mockStatisticCalculation.Setup(calculation => calculation.Execute("expression")).Returns(new StatisticResult(new List<Dictionary<string, object>>()));
+            var mockMapper = new Mock<IMapper>();
+
+            var service = new StatisticService(
+                mockStatisticRepository.Object,
+                mockStatisticCalculation.Object,
+                mockMapper.Object);
+
+            //Action
+            StatisticResult actualResult = service.Execute("expression");
+            var expectedResult = new StatisticResult(new List<Dictionary<string, object>>());
+
+            //Assert
+            Assert.AreEqual(actualResult.Results.Count, expectedResult.Results.Count);
+        }
+
         [Test]
         public void Get_Success()
         {

@@ -24,7 +24,7 @@ namespace Services.CatSharingManagement
             UserInDbModel userInDb = userDatabase.Get(info.UserId);
             if (userInDb == null)
             {
-                return new ServiceResult<CatSharingModel>(ServiceResultStatus.ItemNotFound, "UserToShare cannot be found");
+                return new ServiceResult<CatSharingModel>(ServiceResultStatus.ItemNotFound, "User to share cannot be found");
             }
 
             CatInDbModel cat = catDatabase.Get(info.CatId);
@@ -32,6 +32,7 @@ namespace Services.CatSharingManagement
             {
                 return new ServiceResult<CatSharingModel>(ServiceResultStatus.ItemNotFound, "Cat is not found");
             }
+
             if(cat.OwnerId != ownerId)
             {
                 return new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the pet");
