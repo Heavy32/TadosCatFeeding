@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement.CatManagement
 {
@@ -9,9 +10,9 @@ namespace DataBaseManagement.CatManagement
         {
         }
 
-        public int Create(CatCreateInDbModel info)
+        public async Task<int> CreateAsync(CatCreateInDbModel info)
         {
-            return (int)ExecuteWithOutResult(
+            return (int)await ExecuteWithOutResultAsync(
                  $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
                  new SqlParameter[]
                     {
@@ -26,9 +27,9 @@ namespace DataBaseManagement.CatManagement
                     });
         }
 
-        public CatInDbModel Get(int id)
+        public async Task<CatInDbModel> GetAsync(int id)
         {
-            return ReturnCustomItem(
+            return await ReturnCustomItemAsync(
                 $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
                 ReturnCat,
                 new SqlParameter("@id", id));

@@ -1,7 +1,7 @@
 ﻿using DataBaseManagement.StatisticProvision;
-using Services;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Services.StatisticProvision
 {
@@ -18,26 +18,26 @@ namespace Services.StatisticProvision
             this.mapper = mapper;
         }
 
-        public StatisticResult Execute(string sqlExpression)
+        public async Task<StatisticResult> ExecuteAsync(string sqlExpression)
         {
-            return calculation.Execute(sqlExpression);
+            return await calculation.ExecuteAsync(sqlExpression);
         }
 
-        public ServiceResult<StatisticResult> GetStatisticResult(int id)
+        public async Task<ServiceResult<StatisticResult>> GetStatisticResultAsync(int id)
         {
-            StatisticInDbModel statistic = statisticRepository.Get(id);
+            StatisticInDbModel statistic = await statisticRepository.GetAsync(id);
 
             if (statistic == null)
             {
                 return new ServiceResult<StatisticResult>(ServiceResultStatus.ItemNotFound);
             }
 
-            return new ServiceResult<StatisticResult>(ServiceResultStatus.ItemRecieved, Execute(statistic.SqlExpression));
+            return new ServiceResult<StatisticResult>(ServiceResultStatus.ItemRecieved, await ExecuteAsync(statistic.SqlExpression));
         }
 
-        public ServiceResult<List<StatisticModel>> GetAll()
+        public async Task<ServiceResult<List<StatisticModel>>> GetAllAsync()
         {
-            List<StatisticInDbModel> statistics = statisticRepository.GetAll();
+            List<StatisticInDbModel> statistics = await statisticRepository.GetAllAsync();
 
             if(statistics.Count == 0)
             {

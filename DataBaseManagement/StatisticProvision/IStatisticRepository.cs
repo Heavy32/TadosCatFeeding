@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DataBaseManagement.StatisticProvision
 {
     public interface IStatisticRepository
     {
-        public int Create(StatisticInDbModel info);
-        public StatisticInDbModel Get(int id);
-        public List<StatisticInDbModel> GetAll();
+        public Task<int> CreateAsync(StatisticInDbModel info);
+        public Task<StatisticInDbModel> GetAsync(int id);
+        public Task<List<StatisticInDbModel>> GetAllAsync();
     }
 }

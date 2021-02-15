@@ -1,11 +1,12 @@
 ﻿using DataBaseManagement.StatisticProvision;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Services.StatisticProvision
 {
     public interface IStatisticService
     {
-        public ServiceResult<StatisticResult> GetStatisticResult(int id);
-        public ServiceResult<List<StatisticModel>> GetAll();
+        public Task<ServiceResult<StatisticResult>> GetStatisticResultAsync(int id);
+        public Task<ServiceResult<List<StatisticModel>>> GetAllAsync();
     }
 }

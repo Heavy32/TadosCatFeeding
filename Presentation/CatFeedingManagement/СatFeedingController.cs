@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.CatFeedingManagement;
 
 namespace Presentation
@@ -27,16 +27,16 @@ namespace Presentation
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
-        public IActionResult Feed(int userId, int catId, DateTime feedingTime)
+        public async Task<IActionResult> Feed(int userId, int catId, DateTime feedingTime)
         {
-            return responseConverter.GetResponse(catFeedingService.Feed(new CatFeedingCreateModel(catId, userId, feedingTime)));
+            return responseConverter.GetResponse(await catFeedingService.FeedAsync(new CatFeedingCreateModel(catId, userId, feedingTime)));
         }
 
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        public async Task<IActionResult> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
         {
-            return responseConverter.GetResponse(catFeedingService.GetFeedingForPeriod(userId, catId, start, finish));
+            return responseConverter.GetResponse(await catFeedingService.GetFeedingForPeriodAsync(userId, catId, start, finish));
         }
     }
 }

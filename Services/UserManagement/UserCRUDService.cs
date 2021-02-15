@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Services.UserManagement
 {
@@ -20,9 +21,9 @@ namespace Services.UserManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<UserGetModel> Get(int id)
+        public async Task<ServiceResult<UserGetModel>> GetAsync(int id)
         {
-            UserInDbModel userInDb = database.Get(id);
+            UserInDbModel userInDb = await database.GetAsync(id);
 
             if(userInDb == null)
             {
@@ -32,17 +33,17 @@ namespace Services.UserManagement
             return new ServiceResult<UserGetModel>(ServiceResultStatus.ItemRecieved, mapper.Map<UserGetModel, UserInDbModel>(userInDb));
         }
 
-        public ServiceResult<UserServiceModel> Create(UserCreateModel info)
+        public async Task<ServiceResult<UserServiceModel>> CreateAsync(UserCreateModel info)
         {
             HashedPasswordWithSalt hashSalt = protector.ProtectPassword(info.Password);
 
             UserInDbModel userInDB = new UserInDbModel(0, info.Login, info.Nickname, (int)info.Role, hashSalt.Salt, hashSalt.Password);
 
-            int userId = database.Create(userInDB);
+            int userId = await database.CreateAsync(userInDB);
             return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemCreated, new UserServiceModel(userId, info.Login, info.Password, info.Nickname, info.Role));
         }
 
-        public ServiceResult<UserServiceModel> Update(int id, UserUpdateModel info, IEnumerable<Claim> userClaims)
+        public async Task<ServiceResult<UserServiceModel>> UpdateAsync(int id, UserUpdateModel info, IEnumerable<Claim> userClaims)
         {
             int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value);
             Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value);
@@ -55,7 +56,7 @@ namespace Services.UserManagement
                 }
             }
 
-            UserInDbModel user = database.Get(id);
+            UserInDbModel user = await database.GetAsync(id);
             if (user == null)
             {
                 return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
@@ -73,12 +74,12 @@ namespace Services.UserManagement
                 IsPasswordSame ? user.HashedPassword : hashSalt.Password
             );
 
-            database.Update(id, newUser);
+            await database.UpdateAsync(id, newUser);
 
             return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemChanged);
         }
 
-        public ServiceResult<UserServiceModel> Delete(int id, IEnumerable<Claim> userClaims)
+        public async Task<ServiceResult<UserServiceModel>> DeleteAsync(int id, IEnumerable<Claim> userClaims)
         {
             int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
             Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
@@ -91,13 +92,13 @@ namespace Services.UserManagement
                 }
             }
             
-            UserInDbModel user = database.Get(id);
+            UserInDbModel user = await database.GetAsync(id);
             if (user == null)
             {
                 return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemNotFound, "User cannot be found");
             }
 
-            database.Delete(id);
+            await database.DeleteAsync(id);
             return new ServiceResult<UserServiceModel>(ServiceResultStatus.ItemDeleted);
         }
     }

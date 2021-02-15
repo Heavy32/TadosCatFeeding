@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement
 {
@@ -16,103 +17,102 @@ namespace DataBaseManagement
             this.connectionString = connectionString;
         }
 
-        protected T ReturnCustomItem<T>(string sqlExpression, ReturnItemDelegate<T> function, params SqlParameter[] parameters)
+        protected async Task<T> ReturnCustomItemAsync<T>(string sqlExpression, ReturnItemDelegate<T> function, params SqlParameter[] parameters)
         {
             SqlCommand command = CreateCommand(sqlExpression, parameters);
 
             T item = default;
             using (SqlConnection connection = command.Connection)
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
                 command.Transaction = transaction;
                 try
                 {
-                    item = function.Invoke(command.ExecuteReader());
-                    transaction.Commit();
+                    item = function.Invoke(await command.ExecuteReaderAsync());
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                 }
 
             }
             return item;
         }
 
-        protected List<T> ReturnListCustomItems<T>(string sqlExpression, ReturnItemDelegate<T> function, params SqlParameter[] parameters)
+        protected async Task<List<T>> ReturnListCustomItemsAsync<T>(string sqlExpression, ReturnItemDelegate<T> function, params SqlParameter[] parameters)
         {
             SqlCommand command = CreateCommand(sqlExpression, parameters);
             List<T> items = new List<T>();
             using (SqlConnection connection = command.Connection)
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
                 command.Transaction = transaction;
                 try
                 {
-                    SqlDataReader reader = command.ExecuteReader();
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
                     while (reader.Read())
                     {
                         items.Add(function.Invoke(reader));
                     }
-                    transaction.Commit();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                 }
             }
 
             return items;
         }
 
-        protected void Execute(string sqlExpression, params SqlParameter[] parameters)
+        protected async Task ExecuteAsync(string sqlExpression, params SqlParameter[] parameters)
         {
             SqlCommand command = CreateCommand(sqlExpression, parameters);
 
             using (SqlConnection connection = command.Connection)
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
                 command.Transaction = transaction;
                 try
                 {
-                    command.ExecuteNonQuery();
-                    transaction.Commit();
+                    await command.ExecuteNonQueryAsync();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                 }
             }
         }
 
-        protected object ExecuteWithOutResult(string sqlExpression, params SqlParameter[] parameters)
+        protected async Task<object> ExecuteWithOutResultAsync(string sqlExpression, params SqlParameter[] parameters)
         {
             SqlCommand command = CreateCommand(sqlExpression, parameters);
 
             object result = default;
             using (SqlConnection connection = command.Connection)
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
                 command.Transaction = transaction;
                 try
                 {
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                     SqlParameter outParameter = parameters.FirstOrDefault(x => x.Direction == ParameterDirection.Output);
                     result = outParameter.Value;
-                    transaction.Commit();
+                    await transaction.CommitAsync();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine(ex.Message);
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                 }
             }
             return result;

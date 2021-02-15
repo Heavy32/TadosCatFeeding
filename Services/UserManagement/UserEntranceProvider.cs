@@ -2,6 +2,7 @@
 using Services.UserManagement.PasswordProtection;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Services.UserManagement
 {
@@ -18,9 +19,9 @@ namespace Services.UserManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<TokenJwt> LogIn(string login, string password)
+        public async Task<ServiceResult<TokenJwt>> LogIn(string login, string password)
         {
-            UserInDbModel user = database.GetUserByLogin(login);
+            UserInDbModel user = await database.GetUserByLoginAsync(login);
             if (user == null)
             {
                 return new ServiceResult<TokenJwt>(ServiceResultStatus.IncorrectLoginPassword);

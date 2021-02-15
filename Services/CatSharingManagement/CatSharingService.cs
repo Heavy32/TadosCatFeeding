@@ -1,6 +1,7 @@
 ﻿using DataBaseManagement.CatManagement;
 using DataBaseManagement.CatSharingManagement;
 using DataBaseManagement.UserManagement;
+using System.Threading.Tasks;
 
 namespace Services.CatSharingManagement
 {
@@ -19,15 +20,15 @@ namespace Services.CatSharingManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<CatSharingModel> Share(CatSharingCreateModel info, int ownerId)
+        public async Task<ServiceResult<CatSharingModel>> ShareAsync(CatSharingCreateModel info, int ownerId)
         {
-            UserInDbModel userInDb = userDatabase.Get(info.UserId);
+            UserInDbModel userInDb = await userDatabase.GetAsync(info.UserId);
             if (userInDb == null)
             {
                 return new ServiceResult<CatSharingModel>(ServiceResultStatus.ItemNotFound, "User to share cannot be found");
             }
 
-            CatInDbModel cat = catDatabase.Get(info.CatId);
+            CatInDbModel cat = await catDatabase.GetAsync(info.CatId);
             if(cat == null)
             {
                 return new ServiceResult<CatSharingModel>(ServiceResultStatus.ItemNotFound, "Cat is not found");
@@ -38,16 +39,16 @@ namespace Services.CatSharingManagement
                 return new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the pet");
             }
 
-            if(!IsPetSharedWithUser(info.UserId, info.CatId))
+            if(!await IsPetSharedWithUser(info.UserId, info.CatId))
             {
-                catSharingDatabase.Create(mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(info));
+                await catSharingDatabase.CreateAsync(mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(info));
             }
             return new ServiceResult<CatSharingModel>(ServiceResultStatus.PetIsShared);
         }
 
-        public bool IsPetSharedWithUser(int userId, int petId)
+        public async Task<bool> IsPetSharedWithUser(int userId, int petId)
         {
-            return catSharingDatabase.IsPetSharedWithUser(userId, petId);
+            return await catSharingDatabase.IsPetSharedWithUserAsync(userId, petId);
         }
     }
 }

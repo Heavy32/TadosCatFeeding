@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Services.CatManagement
 {
@@ -24,7 +25,7 @@ namespace Services.CatManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<CatServiceModel> Create(CatCreateServiceModel info, IEnumerable<Claim> userClaims)
+        public async Task<ServiceResult<CatServiceModel>> CreateAsync(CatCreateServiceModel info, IEnumerable<Claim> userClaims)
         {
             int userId = Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
             Roles userRole = (Roles)Convert.ToInt32(userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role).Value);
@@ -37,23 +38,23 @@ namespace Services.CatManagement
                 }
             }
 
-            UserInDbModel user = userDatabase.Get(info.OwnerId);
+            UserInDbModel user = await userDatabase.GetAsync(info.OwnerId);
             if (user == null)
             {
                 return new ServiceResult<CatServiceModel>(ServiceResultStatus.ItemNotFound, "User is not found");
             }
 
-            int catId = catDatabase.Create(mapper.Map<CatCreateInDbModel, CatCreateServiceModel>(info));
+            int catId = await catDatabase.CreateAsync(mapper.Map<CatCreateInDbModel, CatCreateServiceModel>(info));
 
             CatServiceModel cat = new CatServiceModel(catId, info.Name, info.OwnerId);
-            catSharingDatabase.Create(new CatSharingCreateInDbModel(cat.Id, info.OwnerId));
+            await catSharingDatabase.CreateAsync(new CatSharingCreateInDbModel(cat.Id, info.OwnerId));
 
             return new ServiceResult<CatServiceModel>(ServiceResultStatus.ItemCreated, cat);
         }
 
-        public ServiceResult<CatGetServiceModel> Get(int id)
+        public async Task<ServiceResult<CatGetServiceModel>> GetAsync(int id)
         {
-            CatInDbModel cat = catDatabase.Get(id);
+            CatInDbModel cat = await catDatabase.GetAsync(id);
             if(cat == null)
             {
                 return new ServiceResult<CatGetServiceModel>(ServiceResultStatus.ItemNotFound, "Cat is not found");

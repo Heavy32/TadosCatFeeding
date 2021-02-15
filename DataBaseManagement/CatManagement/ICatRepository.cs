@@ -1,8 +1,10 @@
-﻿namespace DataBaseManagement.CatManagement
+﻿using System.Threading.Tasks;
+
+namespace DataBaseManagement.CatManagement
 {
     public interface ICatRepository
     {
-        public int Create(CatCreateInDbModel info);
-        public CatInDbModel Get(int id);
+        public Task<int> CreateAsync(CatCreateInDbModel info);
+        public Task<CatInDbModel> GetAsync(int id);
     }
 }

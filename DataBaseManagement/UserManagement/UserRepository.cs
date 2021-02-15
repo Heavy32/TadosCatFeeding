@@ -1,18 +1,16 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement.UserManagement
 {
     public class UserRepository : Repository, IUserRepository
     {
-        public UserRepository(string connectionString) : base(connectionString)
-        {
+        public UserRepository(string connectionString) : base(connectionString) { }
 
-        }
-
-        public UserInDbModel GetUserByLogin(string login)
+        public async Task<UserInDbModel> GetUserByLoginAsync(string login)
         {
-            return ReturnCustomItem(
+            return await ReturnCustomItemAsync(
                 "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Login = @login",
                 ReturnUser,
                 new SqlParameter[]
@@ -21,9 +19,9 @@ namespace DataBaseManagement.UserManagement
                 });
         }        
 
-        public int Create(UserInDbModel info)
+        public async Task<int> CreateAsync(UserInDbModel info)
         {            
-            int id = (int)ExecuteWithOutResult(
+            int id = (int)await ExecuteWithOutResultAsync(
                 "INSERT INTO Users (Login, Nickname, Role, Salt, HashedPassword) VALUES (@Login, @Nickname, @Role, @Salt, @Password); SET @id=SCOPE_IDENTITY();",
                 new SqlParameter[]
                     {
@@ -43,9 +41,9 @@ namespace DataBaseManagement.UserManagement
             return id;
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            Execute(
+            await ExecuteAsync(
                 "DELETE FROM Users WHERE Id = @id",
                 new SqlParameter[]
                 {
@@ -53,9 +51,9 @@ namespace DataBaseManagement.UserManagement
                 });
         }
 
-        public UserInDbModel Get(int id)
+        public async Task<UserInDbModel> GetAsync(int id)
         {
-            return ReturnCustomItem(
+            return await ReturnCustomItemAsync(
                 "SELECT Id, Login, Nickname, Role, Salt, HashedPassword FROM Users WHERE Id = @id",
                 ReturnUser,
                 new SqlParameter[]
@@ -64,9 +62,9 @@ namespace DataBaseManagement.UserManagement
                 });
         }
 
-        public void Update(int id, UserInDbModel info)
+        public async Task UpdateAsync(int id, UserInDbModel info)
         {
-            Execute(
+            await ExecuteAsync(
                 "UPDATE Users SET Login = @login, Salt = @Salt, HashedPassword = @password, Nickname = @nickname, Role = @role WHERE Id = @id;",
                 new SqlParameter[]
                     {

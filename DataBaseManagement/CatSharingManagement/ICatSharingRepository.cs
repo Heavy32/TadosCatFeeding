@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace DataBaseManagement.CatSharingManagement
 {
     public interface ICatSharingRepository
     {
-        public int Create(CatSharingCreateInDbModel info);
-        public bool IsPetSharedWithUser(int userId, int petId);
+        public Task<int> CreateAsync(CatSharingCreateInDbModel info);
+        public Task<bool> IsPetSharedWithUserAsync(int userId, int petId);
     }
 }

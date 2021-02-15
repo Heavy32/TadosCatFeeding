@@ -1,6 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement.StatisticProvision
 {
@@ -10,9 +12,9 @@ namespace DataBaseManagement.StatisticProvision
         {
         }
 
-        public int Create(StatisticInDbModel info)
+        public async Task<int> CreateAsync(StatisticInDbModel info)
         {
-            return (int)ExecuteWithOutResult(
+            return (int) await ExecuteWithOutResultAsync(
                 "INSERT INTO Statistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression); SET @id=SCOPE_IDENTITY();",
                 new SqlParameter[]
                     {
@@ -28,9 +30,9 @@ namespace DataBaseManagement.StatisticProvision
                     });
         }
 
-        public StatisticInDbModel Get(int id)
+        public async Task<StatisticInDbModel> GetAsync(int id)
         {
-            return ReturnCustomItem(
+            return await ReturnCustomItemAsync(
                 "SELECT Name, Description, SqlExpression FROM Statistics WHERE Id = @id",
                 ReturnStatistic,
                 new SqlParameter[]
@@ -39,25 +41,26 @@ namespace DataBaseManagement.StatisticProvision
                 });
         }
 
-        public List<StatisticInDbModel> GetAll()
+        public async Task<List<StatisticInDbModel>> GetAllAsync()
         {
-            return ReturnListCustomItems(
+            return await ReturnListCustomItemsAsync(
                 "SELECT Name, Description, SqlExpression FROM Statistics",
                 ReturnStatistic,
-                new SqlParameter[] { });
+                Array.Empty<SqlParameter>());
         }
 
         private StatisticInDbModel ReturnStatistic(SqlDataReader reader)
         {
-            if (reader.Read())
-            {
-                return new StatisticInDbModel(
+            StatisticInDbModel statistic = reader.Read()
+                ? new StatisticInDbModel(
                     (int)reader["Id"],
                     (string)reader["Name"],
                     (string)reader["Description"],
-                    (string)reader["SqlExpression"]);
-            }
-            return null;
+                    (string)reader["SqlExpression"])
+                : null;
+
+            reader.Close();
+            return statistic;
         }
     }
 }

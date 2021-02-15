@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
 namespace DataBaseManagement.CatFeedingManagement
 {
     public class CatFeedingRepository : Repository, ICatFeedingRepository
     {
-        public CatFeedingRepository(string connectionString) : base(connectionString)
-        {
-        }
+        public CatFeedingRepository(string connectionString) : base(connectionString) { }
 
-        public int Create(CatFeedingCreateInDbModel info)
+        public async Task<int> CreateAsync(CatFeedingCreateInDbModel info)
         {
-            return (int)ExecuteWithOutResult(
+            return (int)await ExecuteWithOutResultAsync(
                 "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time) VALUES (@user_Id, @pet_Id, @feed_Time); SET @id=SCOPE_IDENTITY();",
                  new SqlParameter[]
                  {
@@ -29,11 +28,11 @@ namespace DataBaseManagement.CatFeedingManagement
                  });
         }
 
-        public List<DateTime> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        public async Task<List<DateTime>> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish)
         {
             List<DateTime> info = new List<DateTime>();
 
-            List<CatFeedingInDbModel> feeds = ReturnListCustomItems(
+            List<CatFeedingInDbModel> feeds = await ReturnListCustomItemsAsync(
                 "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
                 ReturnFeeding,
                 new SqlParameter[]

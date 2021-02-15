@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.CatSharingManagement;
+using System.Threading.Tasks;
 
 namespace Presentation.PetSharingManagement
 {
@@ -25,9 +25,9 @@ namespace Presentation.PetSharingManagement
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public IActionResult Share(int userId, int catId, int UserToShare)
+        public async Task<IActionResult> Share(int userId, int catId, int UserToShare)
         {
-            return responseConverter.GetResponse(catSharingService.Share(new CatSharingCreateModel(catId, UserToShare), userId));
+            return responseConverter.GetResponse(await catSharingService.ShareAsync(new CatSharingCreateModel(catId, UserToShare), userId));
         }
     }
 }

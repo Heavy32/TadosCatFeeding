@@ -1,18 +1,17 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement.CatSharingManagement
 {
     public class CatSharingRepository : Repository, ICatSharingRepository
     {
 
-        public CatSharingRepository(string connectionString) : base(connectionString)
-        {
-        }
+        public CatSharingRepository(string connectionString) : base(connectionString) { }
 
-        public int Create(CatSharingCreateInDbModel info)
+        public async Task<int> CreateAsync(CatSharingCreateInDbModel info)
         {
-            return (int)ExecuteWithOutResult(
+            return (int)await ExecuteWithOutResultAsync(
                 "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id); SET @id=SCOPE_IDENTITY();",
                 new SqlParameter[]
                     {
@@ -27,9 +26,9 @@ namespace DataBaseManagement.CatSharingManagement
                     });
         }
 
-        public bool IsPetSharedWithUser(int userId, int petId)
+        public async Task<bool> IsPetSharedWithUserAsync(int userId, int petId)
         {
-            CatSharingCreateInDbModel link = ReturnCustomItem(
+            CatSharingCreateInDbModel link = await ReturnCustomItemAsync(
                 "SELECT User_Id, Pet_Id FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;",
                     ReturnLink,
                     new SqlParameter[]

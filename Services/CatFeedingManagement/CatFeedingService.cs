@@ -2,9 +2,9 @@
 using DataBaseManagement.CatManagement;
 using DataBaseManagement.CatSharingManagement;
 using DataBaseManagement.UserManagement;
-using Services;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Services.CatFeedingManagement
 {
@@ -25,45 +25,45 @@ namespace Services.CatFeedingManagement
             this.mapper = mapper;
         }
 
-        public ServiceResult<CatFeedingModel> Feed(CatFeedingCreateModel info)
+        public async Task<ServiceResult<CatFeedingModel>> FeedAsync(CatFeedingCreateModel info)
         {
-            CatInDbModel cat = catDatabase.Get(info.CatId);
+            CatInDbModel cat = await catDatabase.GetAsync(info.CatId);
             if (cat == null)
             {
                 return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ItemNotFound, "Cat is not found");
             }
 
-            UserInDbModel user = userDatabase.Get(info.UserId);
+            UserInDbModel user = await userDatabase.GetAsync(info.UserId);
             if (user == null)
             {
                 return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ItemNotFound, "User is not found");
             }
 
-            if (!catSharingDatabase.IsPetSharedWithUser(info.UserId, info.CatId))
+            if (!await catSharingDatabase.IsPetSharedWithUserAsync(info.UserId, info.CatId))
             {
                 return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ActionNotAllowed, "You cannot feed this cat");
             }
 
-            catFeedingdatabase.Create(mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(info));
+            await catFeedingdatabase.CreateAsync(mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(info));
 
             return new ServiceResult<CatFeedingModel>(ServiceResultStatus.NoContent);
         }
 
-        public ServiceResult<List<DateTime>> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        public async Task<ServiceResult<List<DateTime>>> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish)
         {
-            UserInDbModel user = userDatabase.Get(userId);
+            UserInDbModel user = await userDatabase.GetAsync(userId);
             if(user == null)
             {
                 return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemNotFound, "User is not found");
             }
 
-            CatInDbModel cat = catDatabase.Get(catId);
+            CatInDbModel cat = await catDatabase.GetAsync(catId);
             if(cat == null)
             {
                 return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemNotFound, "Cat is not found");
             }
 
-            return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemRecieved, catFeedingdatabase.GetFeedingForPeriod(userId, catId, start, finish));
+            return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemRecieved, await catFeedingdatabase.GetFeedingForPeriodAsync(userId, catId, start, finish));
         }
     }
 }

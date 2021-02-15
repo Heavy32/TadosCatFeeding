@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.CatManagement;
+using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
@@ -26,9 +26,9 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Create(CatCreateViewModel cat, int userId)
+        public async Task<IActionResult> Create(CatCreateViewModel cat, int userId)
         {
-            return responseConverter.GetResponse(catService.Create(new CatCreateServiceModel(cat.Name, userId), User.Claims));
+            return responseConverter.GetResponse(await catService.CreateAsync(new CatCreateServiceModel(cat.Name, userId), User.Claims));
         }
     }    
 }

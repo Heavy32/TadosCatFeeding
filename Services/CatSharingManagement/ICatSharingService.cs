@@ -1,7 +1,9 @@
-﻿namespace Services.CatSharingManagement
+﻿using System.Threading.Tasks;
+
+namespace Services.CatSharingManagement
 {
     public interface ICatSharingService
     {
-        public ServiceResult<CatSharingModel> Share(CatSharingCreateModel info, int ownerId);
+        public Task<ServiceResult<CatSharingModel>> ShareAsync(CatSharingCreateModel info, int ownerId);
     }
 }

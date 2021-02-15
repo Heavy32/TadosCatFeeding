@@ -1,5 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace DataBaseManagement.StatisticProvision
 {
@@ -12,26 +15,38 @@ namespace DataBaseManagement.StatisticProvision
             this.connectionString = connectionString;
         }
 
-        public StatisticResult Execute(string sqlExpression)
+        public async Task<StatisticResult> ExecuteAsync(string sqlExpression)
         {
             List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
 
             using(SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
+                await connection.OpenAsync();
 
-                while (reader.Read())
+                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.Serializable);
+                command.Transaction = transaction;
+
+                try
                 {
-                    Dictionary<string, object> row = new Dictionary<string, object>();
-
-                    for (int i = 0; i < reader.FieldCount; i++)
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
                     {
-                        row.Add(reader.GetName(i), reader.GetValue(i));
-                    }
+                        Dictionary<string, object> row = new Dictionary<string, object>();
 
-                    results.Add(row);
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            row.Add(reader.GetName(i), reader.GetValue(i));
+                        }
+
+                        results.Add(row);
+                    }
+                    await reader.CloseAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
                 }
 
                 return new StatisticResult(results);

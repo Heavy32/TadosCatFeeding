@@ -6,13 +6,14 @@ using NUnit.Framework;
 using Services.CatSharingManagement;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Services.CatManagement.Tests
 {
     public class CatCRUDServiceTests
     {
         [Test]
-        public void Create_Success_Test()
+        public async Task Create_Success_Test()
         {
             //Arrange
             var user = new UserInDbModel(1, "", "", 1, "", "");
@@ -22,10 +23,10 @@ namespace Services.CatManagement.Tests
             var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
 
             var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.Create(It.IsAny<CatCreateInDbModel>())).Returns(1);
+            mockCatDatabase.Setup(repository => repository.CreateAsync(It.IsAny<CatCreateInDbModel>())).Returns(Task.FromResult(1));
 
             var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.Get(1)).Returns(user);
+            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<CatCreateInDbModel, CatCreateServiceModel>(catCreateServiceModel)).Returns(It.IsAny<CatCreateInDbModel>());
@@ -43,7 +44,7 @@ namespace Services.CatManagement.Tests
                 mockMapper.Object);
 
             //Action
-            ServiceResult<CatServiceModel> actualResult = service.Create(catCreateServiceModel, claims);
+            ServiceResult<CatServiceModel> actualResult = await service.CreateAsync(catCreateServiceModel, claims);
             var expectedResult = new ServiceResult<CatServiceModel>(ServiceResultStatus.ItemCreated, catServiceModel);
 
             //Assert
@@ -52,7 +53,7 @@ namespace Services.CatManagement.Tests
         }
 
         [Test]
-        public void Create_Forbidden_Test()
+        public async Task Create_Forbidden_Test()
         {
             var user = new UserInDbModel(1, "", "", 1, "", "");
             var catCreateServiceModel = new CatCreateServiceModel("", 1);
@@ -60,10 +61,10 @@ namespace Services.CatManagement.Tests
             var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
 
             var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.Create(It.IsAny<CatCreateInDbModel>())).Returns(1);
+            mockCatDatabase.Setup(repository => repository.CreateAsync(It.IsAny<CatCreateInDbModel>())).Returns(Task.FromResult(1));
 
             var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.Get(1)).Returns(user);
+            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<CatCreateInDbModel, CatCreateServiceModel>(catCreateServiceModel)).Returns(It.IsAny<CatCreateInDbModel>());
@@ -80,14 +81,14 @@ namespace Services.CatManagement.Tests
                 mockUserDatabase.Object,
                 mockMapper.Object);
 
-            ServiceResult<CatServiceModel> actualResult = service.Create(catCreateServiceModel, claims);
+            ServiceResult<CatServiceModel> actualResult = await service.CreateAsync(catCreateServiceModel, claims);
             var expectedResult = new ServiceResult<CatServiceModel>(ServiceResultStatus.ActionNotAllowed);
 
             Assert.AreEqual(expectedResult.Status, actualResult.Status);
         }
 
         [Test]
-        public void Create_UserNotFound_Test()
+        public async Task Create_UserNotFound_Test()
         {
             //Arrange
             var catCreateServiceModel = new CatCreateServiceModel("", 1);
@@ -96,10 +97,10 @@ namespace Services.CatManagement.Tests
             var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
 
             var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.Create(It.IsAny<CatCreateInDbModel>())).Returns(1);
+            mockCatDatabase.Setup(repository => repository.CreateAsync(It.IsAny<CatCreateInDbModel>())).Returns(Task.FromResult(1));
 
             var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.Get(1)).Returns((UserInDbModel)null);
+            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((UserInDbModel)null));
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<CatCreateInDbModel, CatCreateServiceModel>(catCreateServiceModel)).Returns(It.IsAny<CatCreateInDbModel>());
@@ -117,7 +118,7 @@ namespace Services.CatManagement.Tests
                 mockMapper.Object);
 
             //Action
-            ServiceResult<CatServiceModel> actualResult = service.Create(catCreateServiceModel, claims);
+            ServiceResult<CatServiceModel> actualResult = await service.CreateAsync(catCreateServiceModel, claims);
             var expectedResult = new ServiceResult<CatServiceModel>(ServiceResultStatus.ItemNotFound, "User is not found");
 
             //Assert
@@ -126,7 +127,7 @@ namespace Services.CatManagement.Tests
         }
 
         [Test]
-        public void Get_Success_Test()
+        public async Task Get_Success_Test()
         {
             //Arrange
             var catGetServiceModel = new CatGetServiceModel(1, "", 1);
@@ -135,7 +136,7 @@ namespace Services.CatManagement.Tests
             var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
 
             var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.Get(1)).Returns(catInDbModel);
+            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
 
             var mockUserDatabase = new Mock<IUserRepository>();
             var mockMapper = new Mock<IMapper>();
@@ -148,7 +149,7 @@ namespace Services.CatManagement.Tests
                 mockMapper.Object);
 
             //Action
-            ServiceResult<CatGetServiceModel> actualResult = service.Get(1);
+            ServiceResult<CatGetServiceModel> actualResult = await service.GetAsync(1);
             var expectedResult = new ServiceResult<CatGetServiceModel>(ServiceResultStatus.ItemRecieved, catGetServiceModel);
 
             //Assert
@@ -157,7 +158,7 @@ namespace Services.CatManagement.Tests
         }
 
         [Test]
-        public void Get_CatNotFound_Test()
+        public async Task Get_CatNotFound_Test()
         {
             //Arrange
             var catGetServiceModel = new CatGetServiceModel(1, "", 1);
@@ -166,7 +167,7 @@ namespace Services.CatManagement.Tests
             var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
 
             var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.Get(1)).Returns((CatInDbModel)null);
+            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((CatInDbModel)null));
 
             var mockUserDatabase = new Mock<IUserRepository>();
             var mockMapper = new Mock<IMapper>();
@@ -179,7 +180,7 @@ namespace Services.CatManagement.Tests
                 mockMapper.Object);
 
             //Action
-            ServiceResult<CatGetServiceModel> actualResult = service.Get(1);
+            ServiceResult<CatGetServiceModel> actualResult = await service.GetAsync(1);
             var expectedResult = new ServiceResult<CatGetServiceModel>(ServiceResultStatus.ItemNotFound);
 
             //Assert

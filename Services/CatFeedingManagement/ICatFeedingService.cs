@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Services.CatFeedingManagement
 {
     public interface ICatFeedingService
     {
-        public ServiceResult<CatFeedingModel> Feed(CatFeedingCreateModel info);
-        public ServiceResult<List<DateTime>> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish);
+        public Task<ServiceResult<CatFeedingModel>> FeedAsync(CatFeedingCreateModel info);
+        public Task<ServiceResult<List<DateTime>>> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish);
     }
 }

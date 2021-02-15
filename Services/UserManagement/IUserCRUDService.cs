@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Services.UserManagement
 {
     public interface IUserCRUDService
     {
-        public ServiceResult<UserGetModel> Get(int id);
-        public ServiceResult<UserServiceModel> Create(UserCreateModel info);
-        public ServiceResult<UserServiceModel> Update(int id, UserUpdateModel info, IEnumerable<Claim> usersClaim);
-        public ServiceResult<UserServiceModel> Delete(int id, IEnumerable<Claim> usersClaim);
+        public Task<ServiceResult<UserGetModel>> GetAsync(int id);
+        public Task<ServiceResult<UserServiceModel>> CreateAsync(UserCreateModel info);
+        public Task<ServiceResult<UserServiceModel>> UpdateAsync(int id, UserUpdateModel info, IEnumerable<Claim> usersClaim);
+        public Task<ServiceResult<UserServiceModel>> DeleteAsync(int id, IEnumerable<Claim> usersClaim);
     }
 }

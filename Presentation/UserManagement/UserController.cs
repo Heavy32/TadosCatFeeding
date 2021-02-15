@@ -7,6 +7,7 @@ using Services;
 using Presentation.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
@@ -33,21 +34,21 @@ namespace Presentation.Controllers
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public IActionResult Create(UserCreateViewModel user)
+        public async Task<IActionResult> Create(UserCreateViewModel user)
         {
             return responseConverter.
                 GetResponse(
-                userCRUDService.Create(
+                await userCRUDService.CreateAsync(
                     mapper.Map<UserCreateModel, UserCreateViewModel>(user)), Request.Path.Value);
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(TokenJwt), 200)]
         [ProducesResponseType(401)]
-        public IActionResult LogIn()
+        public async Task<IActionResult> LogIn()
         {
             (string login, string password) = ExtractCredentials(Request);
-            return responseConverter.GetResponse(userEntrance.LogIn(login, password));
+            return responseConverter.GetResponse(await userEntrance.LogIn(login, password));
         }
 
         [HttpGet("{id:int}")]
@@ -56,9 +57,9 @@ namespace Presentation.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {         
-            return responseConverter.GetResponse(userCRUDService.Get(id));
+            return responseConverter.GetResponse(await userCRUDService.GetAsync(id));
         }
 
         [HttpDelete("{id:int}")]
@@ -67,9 +68,9 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            return responseConverter.GetResponse(userCRUDService.Delete(id, User.Claims));
+            return responseConverter.GetResponse(await userCRUDService.DeleteAsync(id, User.Claims));
         }
 
         [HttpPatch("{id}")]
@@ -79,11 +80,11 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
-        public IActionResult Update(int id, UserUpdateViewModel newUserInfo)
+        public async Task<IActionResult> Update(int id, UserUpdateViewModel newUserInfo)
         {
             return responseConverter.
                 GetResponse(
-                userCRUDService.Update(
+                await userCRUDService.UpdateAsync(
                     id, mapper.Map<UserUpdateModel, UserUpdateViewModel>(newUserInfo),
                     User.Claims));
         }

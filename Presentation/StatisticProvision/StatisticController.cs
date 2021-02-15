@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.StatisticProvision;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
@@ -21,17 +21,17 @@ namespace Presentation.Controllers
         [HttpGet("~/cats/feedings/statistics/{statisticId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public IActionResult Execute(int statisticId)
+        public async Task<IActionResult> Execute(int statisticId)
         {
-            return responseConverter.GetResponse(statisticService.GetStatisticResult(statisticId));
+            return responseConverter.GetResponse(await statisticService.GetStatisticResultAsync(statisticId));
         }
 
         [HttpGet("~/cats/feedings/statistics")]
         [ProducesResponseType(typeof(List<StatisticModel>), 200)]
         [ProducesResponseType(204)]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAllAsync()
         {
-            return responseConverter.GetResponse(statisticService.GetAll());   
+            return responseConverter.GetResponse(await statisticService.GetAllAsync());   
         }
     }
 }
