@@ -98,7 +98,7 @@ namespace Presentation.Controllers
             Encoding encoding = Encoding.GetEncoding("iso-8859-1");
             string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
 
-            var t = usernamePassword.Split(':');
+            var t = usernamePassword.Split(':', 2, StringSplitOptions.None);
 
             return (t[0], t[1]);
         }
