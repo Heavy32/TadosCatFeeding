@@ -26,7 +26,7 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Create(CatCreateViewModel cat, int userId)
+        public async Task<IActionResult> CreateAsync(CatCreateViewModel cat, int userId)
         {
             return responseConverter.GetResponse(await catService.CreateAsync(new CatCreateServiceModel(cat.Name, userId), User.Claims));
         }

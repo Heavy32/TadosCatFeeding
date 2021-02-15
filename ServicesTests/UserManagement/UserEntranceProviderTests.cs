@@ -31,7 +31,7 @@ namespace ServicesTests.UserManagement
                 mockMapper.Object);
 
             //Action
-            ServiceResult<TokenJwt> actualResult = await userEntranceProvider.LogIn("max@mail.com", "password");
+            ServiceResult<TokenJwt> actualResult = await userEntranceProvider.LogInAsync("max@mail.com", "password");
             var expectedResult = new ServiceResult<TokenJwt>(ServiceResultStatus.ItemRecieved, "some token");
 
             //Assert
@@ -60,7 +60,7 @@ namespace ServicesTests.UserManagement
                 mockMapper.Object);
 
             //Action
-            ServiceResult<TokenJwt> actualResult = await userEntranceProvider.LogIn("max@mail.com", "password");
+            ServiceResult<TokenJwt> actualResult = await userEntranceProvider.LogInAsync("max@mail.com", "password");
             var expectedResult = new ServiceResult<TokenJwt>(ServiceResultStatus.IncorrectLoginPassword);
 
             //Assert

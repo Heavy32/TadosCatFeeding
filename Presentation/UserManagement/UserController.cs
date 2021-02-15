@@ -34,7 +34,7 @@ namespace Presentation.Controllers
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Create(UserCreateViewModel user)
+        public async Task<IActionResult> CreateAsync(UserCreateViewModel user)
         {
             return responseConverter.
                 GetResponse(
@@ -45,10 +45,10 @@ namespace Presentation.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(TokenJwt), 200)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> LogIn()
+        public async Task<IActionResult> LogInAsync()
         {
             (string login, string password) = ExtractCredentials(Request);
-            return responseConverter.GetResponse(await userEntrance.LogIn(login, password));
+            return responseConverter.GetResponse(await userEntrance.LogInAsync(login, password));
         }
 
         [HttpGet("{id:int}")]
@@ -57,7 +57,7 @@ namespace Presentation.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetAsync(int id)
         {         
             return responseConverter.GetResponse(await userCRUDService.GetAsync(id));
         }
@@ -68,7 +68,7 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             return responseConverter.GetResponse(await userCRUDService.DeleteAsync(id, User.Claims));
         }
@@ -80,7 +80,7 @@ namespace Presentation.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> Update(int id, UserUpdateViewModel newUserInfo)
+        public async Task<IActionResult> UpdateAsync(int id, UserUpdateViewModel newUserInfo)
         {
             return responseConverter.
                 GetResponse(

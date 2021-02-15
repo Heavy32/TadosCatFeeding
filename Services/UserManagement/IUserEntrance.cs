@@ -4,6 +4,6 @@ namespace Services.UserManagement
 {
     public interface IUserEntrance
     {
-        public Task<ServiceResult<TokenJwt>> LogIn(string login, string password);
+        public Task<ServiceResult<TokenJwt>> LogInAsync(string login, string password);
     }
 }

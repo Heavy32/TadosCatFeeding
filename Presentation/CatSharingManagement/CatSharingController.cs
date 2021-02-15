@@ -25,7 +25,7 @@ namespace Presentation.PetSharingManagement
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> Share(int userId, int catId, int UserToShare)
+        public async Task<IActionResult> ShareAsync(int userId, int catId, int UserToShare)
         {
             return responseConverter.GetResponse(await catSharingService.ShareAsync(new CatSharingCreateModel(catId, UserToShare), userId));
         }

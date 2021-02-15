@@ -19,7 +19,7 @@ namespace Services.UserManagement
             this.mapper = mapper;
         }
 
-        public async Task<ServiceResult<TokenJwt>> LogIn(string login, string password)
+        public async Task<ServiceResult<TokenJwt>> LogInAsync(string login, string password)
         {
             UserInDbModel user = await database.GetUserByLoginAsync(login);
             if (user == null)

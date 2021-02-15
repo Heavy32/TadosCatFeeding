@@ -27,14 +27,14 @@ namespace Presentation
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> Feed(int userId, int catId, DateTime feedingTime)
+        public async Task<IActionResult> FeedAsync(int userId, int catId, DateTime feedingTime)
         {
             return responseConverter.GetResponse(await catFeedingService.FeedAsync(new CatFeedingCreateModel(catId, userId, feedingTime)));
         }
 
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetFeedingForPeriod(int userId, int catId, DateTime start, DateTime finish)
+        public async Task<IActionResult> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish)
         {
             return responseConverter.GetResponse(await catFeedingService.GetFeedingForPeriodAsync(userId, catId, start, finish));
         }

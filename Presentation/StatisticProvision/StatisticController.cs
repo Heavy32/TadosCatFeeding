@@ -21,7 +21,7 @@ namespace Presentation.Controllers
         [HttpGet("~/cats/feedings/statistics/{statisticId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Execute(int statisticId)
+        public async Task<IActionResult> ExecuteAsync(int statisticId)
         {
             return responseConverter.GetResponse(await statisticService.GetStatisticResultAsync(statisticId));
         }
