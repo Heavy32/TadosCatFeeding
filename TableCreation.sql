@@ -2,10 +2,11 @@ CREATE DATABASE CatFeeding;
 
 CREATE TABLE Users (
 	     Id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-	  Login VARCHAR(100),
-   Password VARCHAR(100),
-   Nickname NVARCHAR(100),
-       Role NVARCHAR(50)
+	  Login VARCHAR(100) NOT NULL UNIQUE,
+       Nickname NVARCHAR(100),
+	   Salt VARCHAR(100) NOT NULL,
+ HashedPassword VARCHAR(400) NOT NULL,
+           Role INT NOT NULL
 );
 
 CREATE TABLE Pets (
