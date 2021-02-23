@@ -203,7 +203,7 @@ namespace Services.CatFeedingManagement.Tests
             mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
 
             var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
+            mockCatFeedingRepository.Setup(repository => repository.GetFeedingsForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -249,7 +249,7 @@ namespace Services.CatFeedingManagement.Tests
             mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
 
             var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
+            mockCatFeedingRepository.Setup(repository => repository.GetFeedingsForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -295,7 +295,7 @@ namespace Services.CatFeedingManagement.Tests
             mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
 
             var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
+            mockCatFeedingRepository.Setup(repository => repository.GetFeedingsForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
