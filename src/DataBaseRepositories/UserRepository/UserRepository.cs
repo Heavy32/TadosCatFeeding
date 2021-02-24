@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -19,8 +20,8 @@ namespace DataBaseRepositories.UserManagement
 
         public async Task<int> CreateAsync(UserInDbModel info)
             => await ExecuteSqlCommand(
-                    "INSERT INTO Users (Login, Nickname, Role, Salt, HashedPassword) VALUES (@Login, @Nickname, @Role, @Salt, @Password); SET @id=SCOPE_IDENTITY();",
-                    async command => await command.ExecuteNonQueryAsync(),
+                    "INSERT INTO Users (Login, Nickname, Role, Salt, HashedPassword) VALUES (@Login, @Nickname, @Role, @Salt, @Password); SELECT SCOPE_IDENTITY();",
+                    async command => Convert.ToInt32(await command.ExecuteScalarAsync()),
                     new SqlParameter[]
                         {
                             new SqlParameter("@Login", info.Login),

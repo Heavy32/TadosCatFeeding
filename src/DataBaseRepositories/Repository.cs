@@ -31,7 +31,7 @@ namespace DataBaseRepositories
                     await transaction.CommitAsync();
                     return item;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
                     return default;
