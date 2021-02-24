@@ -40,12 +40,12 @@ namespace WebApi
                 opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            var userRepository = new UserRepository(Configuration.GetConnectionString("PetFeedingDB"));
-            var catRepository = new CatRepository(Configuration.GetConnectionString("PetFeedingDB"));
-            var statisticRepository = new StatisticRepository(Configuration.GetConnectionString("PetFeedingDB"));
-            var catSharingRepository = new CatSharingRepository(Configuration.GetConnectionString("PetFeedingDB"));
-            var catFeedingRepository = new CatFeedingRepository(Configuration.GetConnectionString("PetFeedingDB"));
-            var statisticCalculation = new StatisticCalculation(Configuration.GetConnectionString("PetFeedingDB"));
+            var userRepository = new UserRepository(Configuration.GetConnectionString("CatFeedingDB"));
+            var catRepository = new CatRepository(Configuration.GetConnectionString("CatFeedingDB"));
+            var statisticRepository = new StatisticRepository(Configuration.GetConnectionString("CatFeedingDB"));
+            var catSharingRepository = new CatSharingRepository(Configuration.GetConnectionString("CatFeedingDB"));
+            var catFeedingRepository = new CatFeedingRepository(Configuration.GetConnectionString("CatFeedingDB"));
+            var statisticCalculation = new StatisticCalculation(Configuration.GetConnectionString("CatFeedingDB"));
 
             services.AddScoped<IUserEntrance>(userEntrance => new UserEntranceProvider(userRepository, new HashWithSaltProtector(10), new Mapper()));
             services.AddScoped<IUserCRUDService>(userCRUDservice => new UserCRUDService(userRepository, new HashWithSaltProtector(10), new Mapper()));

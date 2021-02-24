@@ -21,13 +21,13 @@ namespace BusinessLogic.CatSharingManagement.Tests
 
         private void SetUpMockRepositories(
             int catSharingCreateResult,
-            bool isPetShared,
+            bool isCatShared,
             CatInDbModel catGetResult,
             UserInDbModel userGetResult,
             CatSharingCreateInDbModel mapperResult)
         {
             mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(catSharingCreateResult));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(isPetShared));
+            mockCatSharingDatabase.Setup(repository => repository.IsCatSharedWithUserAsync(1, 1)).Returns(Task.FromResult(isCatShared));
             mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catGetResult));
             mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userGetResult));
             mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(mapperResult);
@@ -48,7 +48,7 @@ namespace BusinessLogic.CatSharingManagement.Tests
 
             //Action
             ServiceResult<CatSharingModel> actualResult = await service.ShareAsync(catSharingCreate, 1);
-            var expectedResult = new ServiceResult<CatSharingModel>(ServiceResultStatus.PetIsShared);
+            var expectedResult = new ServiceResult<CatSharingModel>(ServiceResultStatus.CatIsShared);
 
             //Assert 
             Assert.AreEqual(expectedResult.Status, actualResult.Status);
@@ -110,7 +110,7 @@ namespace BusinessLogic.CatSharingManagement.Tests
 
             //Action
             ServiceResult<CatSharingModel> actualResult = await service.ShareAsync(catSharingCreate, 99);
-            var expectedResult = new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the pet");
+            var expectedResult = new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the cat");
 
             //Assert 
             Assert.AreEqual(expectedResult.Status, actualResult.Status);
@@ -118,7 +118,7 @@ namespace BusinessLogic.CatSharingManagement.Tests
         }
 
         [Test]
-        public async Task IsPetShared_Success_Test()
+        public async Task IsCatShared_Success_Test()
         {
             //Arrange
             SetUpMockRepositories(1, true, cat, user, catSharingCreateInDb);
@@ -130,7 +130,7 @@ namespace BusinessLogic.CatSharingManagement.Tests
                 mockMapper.Object);
 
             //Action
-            bool actualResult = await service.IsPetSharedWithUser(1,1);
+            bool actualResult = await service.IsCatSharedWithUser(1,1);
             var expectedResult = true;
 
             //Assert 

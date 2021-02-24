@@ -36,19 +36,19 @@ namespace BusinessLogic.CatSharingManagement
 
             if(cat.OwnerId != ownerId)
             {
-                return new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the pet");
+                return new ServiceResult<CatSharingModel>(ServiceResultStatus.CantShareWithUser, "This user cannot share the cat");
             }
 
-            if(!await IsPetSharedWithUser(info.UserId, info.CatId))
+            if(!await IsCatSharedWithUser(info.UserId, info.CatId))
             {
                 await catSharingDatabase.CreateAsync(mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(info));
             }
-            return new ServiceResult<CatSharingModel>(ServiceResultStatus.PetIsShared);
+            return new ServiceResult<CatSharingModel>(ServiceResultStatus.CatIsShared);
         }
 
-        public async Task<bool> IsPetSharedWithUser(int userId, int petId)
+        public async Task<bool> IsCatSharedWithUser(int userId, int catId)
         {
-            return await catSharingDatabase.IsPetSharedWithUserAsync(userId, petId);
+            return await catSharingDatabase.IsCatSharedWithUserAsync(userId, catId);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace WebApi
         public IActionResult GetResponse<T>(ServiceResult<T> result, string modelLocation = null)
             => result.Status switch
             {
-                ServiceResultStatus.PetIsShared => new NoContentResult(),
+                ServiceResultStatus.CatIsShared => new NoContentResult(),
                 ServiceResultStatus.IncorrectLoginPassword => new UnauthorizedResult(),
                 ServiceResultStatus.ItemCreated => new CreatedResult(modelLocation + (result.ReturnedObject as IUniqueModel)?.Id, result.ReturnedObject),
                 ServiceResultStatus.ItemChanged => new NoContentResult(),

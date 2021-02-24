@@ -5,6 +5,6 @@ namespace DataBaseRepositories.CatSharingRepository
     public interface ICatSharingRepository
     {
         public Task<int> CreateAsync(CatSharingCreateInDbModel info);
-        public Task<bool> IsPetSharedWithUserAsync(int userId, int petId);
+        public Task<bool> IsCatSharedWithUserAsync(int userId, int catId);
     }
 }

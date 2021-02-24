@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -12,8 +13,8 @@ namespace DataBaseRepositories.CatRepository
 
         public async Task<int> CreateAsync(CatCreateInDbModel info)
             => await ExecuteSqlCommand(
-                     $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
-                     async command => await command.ExecuteNonQueryAsync(),
+                     $"INSERT INTO Cats (Name, Owner_Id) VALUES (@name, @owner_Id); SELECT SCOPE_IDENTITY();",
+                     async command => Convert.ToInt32(await command.ExecuteScalarAsync()),
                      new SqlParameter[]
                         {
                             new SqlParameter("@name", info.Name),
@@ -28,7 +29,7 @@ namespace DataBaseRepositories.CatRepository
 
         public async Task<CatInDbModel> GetAsync(int id)
             => await ExecuteSqlCommand(
-                    $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
+                    $"SELECT Id, Name, Owner_Id FROM Cats WHERE Id = @id",
                     ReturnCat,
                     new SqlParameter("@id", id));
 

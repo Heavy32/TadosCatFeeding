@@ -39,7 +39,7 @@ namespace BusinessLogic.CatFeedingManagement
                 return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ItemNotFound, "User is not found");
             }
 
-            if (!await catSharingDatabase.IsPetSharedWithUserAsync(info.UserId, info.CatId))
+            if (!await catSharingDatabase.IsCatSharedWithUserAsync(info.UserId, info.CatId))
             {
                 return new ServiceResult<CatFeedingModel>(ServiceResultStatus.ActionNotAllowed, "You cannot feed this cat");
             }

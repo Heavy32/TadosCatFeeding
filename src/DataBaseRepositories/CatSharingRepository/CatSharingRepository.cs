@@ -11,12 +11,12 @@ namespace DataBaseRepositories.CatSharingRepository
 
         public async Task<int> CreateAsync(CatSharingCreateInDbModel info)
             => await ExecuteSqlCommand(
-                    "INSERT INTO UsersPets (User_Id, Pet_Id) VALUES (@user_id, @pet_id); SET @id=SCOPE_IDENTITY();",
+                    "INSERT INTO UsersCats (User_Id, Cat_Id) VALUES (@user_id, @cat_id); SET @id=SCOPE_IDENTITY();",
                     async command => await command.ExecuteNonQueryAsync(),
                     new SqlParameter[]
                         {
                             new SqlParameter("@user_Id", info.UserId),
-                            new SqlParameter("@pet_id", info.CatId),
+                            new SqlParameter("@cat_id", info.CatId),
                             new SqlParameter
                             {
                                 ParameterName = "@id",
@@ -25,14 +25,14 @@ namespace DataBaseRepositories.CatSharingRepository
                             }
                         });
 
-        public async Task<bool> IsPetSharedWithUserAsync(int userId, int petId)
+        public async Task<bool> IsCatSharedWithUserAsync(int userId, int catId)
             => await ExecuteSqlCommand(
-                    "SELECT User_Id, Pet_Id FROM UsersPets WHERE User_Id = @user_id AND Pet_Id = @pet_id;",
+                    "SELECT User_Id, Cat_Id FROM UsersCats WHERE User_Id = @user_id AND Cat_Id = @cat_id;",
                      ReturnLink,
                      new SqlParameter[]
                      {
                          new SqlParameter("@user_Id", userId),
-                         new SqlParameter("@pet_Id", petId)
+                         new SqlParameter("@cat_Id", catId)
                      }) != null;
 
         private async Task<CatSharingCreateInDbModel> ReturnLink(SqlCommand command)
@@ -42,7 +42,7 @@ namespace DataBaseRepositories.CatSharingRepository
             var link = reader.Read()
                 ? new CatSharingCreateInDbModel(
                     (int)reader["User_Id"],
-                    (int)reader["Pet_Id"])
+                    (int)reader["Cat_Id"])
                 : null;
 
             reader.Close();

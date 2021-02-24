@@ -37,7 +37,7 @@ namespace BusinessLogic.CatFeedingManagement.Tests
             CatFeedingCreateInDbModel mapperResult
             )
         {
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(catSharingRepositoryResult));
+            mockCatSharingDatabase.Setup(repository => repository.IsCatSharedWithUserAsync(1, 1)).Returns(Task.FromResult(catSharingRepositoryResult));
             mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catRepositoryResult));
             mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userRepositoryResult));
             mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(catFeedingRepositoryResult));
@@ -66,7 +66,7 @@ namespace BusinessLogic.CatFeedingManagement.Tests
         }
 
         [Test]
-        public async Task Feed_PetIsNotShared_FailedTest()
+        public async Task Feed_CatIsNotShared_FailedTest()
         {
             //Arrange
             SetUpMockRepositories(false, catInDbModel, userInDbModel, 1, catFeedingCreateInDbModel);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BusinessLogic.CatFeedingManagement;
+using WebApi.Models;
 
 namespace WebApi.Controllers
 {
@@ -27,9 +28,9 @@ namespace WebApi.Controllers
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> FeedAsync(int userId, int catId, DateTime feedingTime)
+        public async Task<IActionResult> FeedAsync(int userId, int catId, [FromBody]FeedingTimeViewModel time)
         {
-            return responseConverter.GetResponse(await catFeedingService.FeedAsync(new CatFeedingCreateModel(catId, userId, feedingTime)));
+            return responseConverter.GetResponse(await catFeedingService.FeedAsync(new CatFeedingCreateModel(catId, userId, time.FeedingTime)));
         }
 
         [HttpGet("~/users/{userId}/cats/{catId}/feedings")]

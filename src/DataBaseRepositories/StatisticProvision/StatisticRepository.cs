@@ -14,8 +14,8 @@ namespace DataBaseRepositories.StatisticProvision
 
         public async Task<int> CreateAsync(StatisticInDbModel info)
             => await ExecuteSqlCommand(
-                   "INSERT INTO Statistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression); SET @id=SCOPE_IDENTITY();",
-                   async command => await command.ExecuteNonQueryAsync(),
+                   "INSERT INTO CatStatistics (Name, Description, SqlExpression) VALUES (@name, @description, @sqlExpression); SELECT SCOPE_IDENTITY();",
+                   async command => Convert.ToInt32(await command.ExecuteScalarAsync()),
                    new SqlParameter[]
                        {
                            new SqlParameter("@name", info.Name),
@@ -31,7 +31,7 @@ namespace DataBaseRepositories.StatisticProvision
 
         public async Task<StatisticInDbModel> GetAsync(int id)
             => await ExecuteSqlCommand(
-                    "SELECT Name, Description, SqlExpression FROM Statistics WHERE Id = @id",               
+                    "SELECT Id, Name, Description, SqlExpression FROM CatStatistics WHERE Id = @id",               
                     ReturnStatistic,
                     new SqlParameter[]
                     {
@@ -40,7 +40,7 @@ namespace DataBaseRepositories.StatisticProvision
 
         public async Task<List<StatisticInDbModel>> GetAllAsync()
             => await ExecuteSqlCommand(
-                    "SELECT Name, Description, SqlExpression FROM Statistics",
+                    "SELECT Id, Name, Description, SqlExpression FROM CatStatistics",
                     ReturnListStatistic,
                     Array.Empty<SqlParameter>());
 
