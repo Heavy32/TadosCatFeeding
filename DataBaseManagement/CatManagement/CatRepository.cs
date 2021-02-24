@@ -11,31 +11,32 @@ namespace DataBaseManagement.CatManagement
         }
 
         public async Task<int> CreateAsync(CatCreateInDbModel info)
-            => await ExecuteSqlCommand(
-                     $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
-                     async command => await command.ExecuteNonQueryAsync(),
-                     new SqlParameter[]
+        {
+            return (int)await ExecuteWithOutResultAsync(
+                 $"INSERT INTO Pets (Name, Owner_Id) VALUES (@name, @owner_Id); SET @id=SCOPE_IDENTITY();",
+                 new SqlParameter[]
+                    {
+                        new SqlParameter("@name", info.Name),
+                        new SqlParameter("@owner_Id", info.OwnerId),
+                        new SqlParameter
                         {
-                            new SqlParameter("@name", info.Name),
-                            new SqlParameter("@owner_Id", info.OwnerId),
-                            new SqlParameter
-                            {
-                                ParameterName = "@id",
-                                SqlDbType = SqlDbType.Int,
-                                Direction = ParameterDirection.Output
-                            }
-                        });
+                            ParameterName = "@id",
+                            SqlDbType = SqlDbType.Int,
+                            Direction = ParameterDirection.Output
+                        }
+                    });
+        }
 
         public async Task<CatInDbModel> GetAsync(int id)
-            => await ExecuteSqlCommand(
-                    $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
-                    ReturnCat,
-                    new SqlParameter("@id", id));
-
-        private async Task<CatInDbModel> ReturnCat(SqlCommand command)
         {
-            SqlDataReader reader = await command.ExecuteReaderAsync();
+            return await ReturnCustomItemAsync(
+                $"SELECT Id, Name, Owner_Id FROM Pets WHERE Id = @id",
+                ReturnCat,
+                new SqlParameter("@id", id));
+        }
 
+        private CatInDbModel ReturnCat(SqlDataReader reader)
+        {
             var cat = reader.Read()
             ? new CatInDbModel(
                 (int)reader["Id"],
@@ -43,7 +44,6 @@ namespace DataBaseManagement.CatManagement
                 (int)reader["Owner_Id"])
             : null;
             reader.Close();
-
             return cat;
         }
     }

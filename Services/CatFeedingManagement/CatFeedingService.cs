@@ -63,13 +63,7 @@ namespace Services.CatFeedingManagement
                 return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemNotFound, "Cat is not found");
             }
 
-            List<DateTime> info = new List<DateTime>();
-            List<CatFeedingInDbModel> feedings = await catFeedingdatabase.GetFeedingsForPeriodAsync(userId, catId, start, finish);
-            for (int i = 0; i < feedings.Count; i++)
-            {
-                info.Add(feedings[i].FeedingTime);
-            }
-            return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemRecieved, info);
+            return new ServiceResult<List<DateTime>>(ServiceResultStatus.ItemRecieved, await catFeedingdatabase.GetFeedingForPeriodAsync(userId, catId, start, finish));
         }
     }
 }
