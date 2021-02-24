@@ -12,30 +12,43 @@ namespace Services.CatFeedingManagement.Tests
 {
     public class CatFeedingServiceTests
     {
+        private static readonly DateTime now = DateTime.UtcNow;
+        private readonly CatFeedingCreateModel catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
+        private readonly CatInDbModel catInDbModel = new CatInDbModel(1, "", 1);
+        private readonly UserInDbModel userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
+        private readonly CatFeedingCreateInDbModel catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
+        private readonly List<DateTime> results = new List<DateTime>
+        {
+            now,
+            now
+        };
+
+        private readonly Mock<ICatSharingRepository> mockCatSharingDatabase = new Mock<ICatSharingRepository>();
+        private readonly Mock<ICatRepository> mockCatDatabase = new Mock<ICatRepository>();
+        private readonly Mock<IUserRepository> mockUserDatabase = new Mock<IUserRepository>();
+        private readonly Mock<IMapper> mockMapper = new Mock<IMapper>();
+        private readonly Mock<ICatFeedingRepository> mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
+
+        private void SetUpMockRepositories(
+            bool catSharingRepositoryResult,
+            CatInDbModel catRepositoryResult,
+            UserInDbModel userRepositoryResult,
+            int catFeedingRepositoryResult,
+            CatFeedingCreateInDbModel mapperResult
+            )
+        {
+            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(catSharingRepositoryResult));
+            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catRepositoryResult));
+            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userRepositoryResult));
+            mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(catFeedingRepositoryResult));
+            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(mapperResult);
+        }
+
         [Test]
         public async Task Feed_Success_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userInDbModel));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-            
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(1));
+            SetUpMockRepositories(true, catInDbModel, userInDbModel, 1, catFeedingCreateInDbModel);
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -56,26 +69,7 @@ namespace Services.CatFeedingManagement.Tests
         public async Task Feed_PetIsNotShared_FailedTest()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(false));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userInDbModel));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(1));
+            SetUpMockRepositories(false, catInDbModel, userInDbModel, 1, catFeedingCreateInDbModel);
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -97,27 +91,8 @@ namespace Services.CatFeedingManagement.Tests
         public async Task Feed_UserNotFound_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((UserInDbModel)null));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(1));
-
+            SetUpMockRepositories(true, catInDbModel, null, 1, catFeedingCreateInDbModel);
+            
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
                 mockCatDatabase.Object,
@@ -138,26 +113,7 @@ namespace Services.CatFeedingManagement.Tests
         public async Task Feed_CatNotFound_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((CatInDbModel)null));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userInDbModel));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.CreateAsync(catFeedingCreateInDbModel)).Returns(Task.FromResult(1));
+            SetUpMockRepositories(true, null, userInDbModel, 1, catFeedingCreateInDbModel);
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -179,30 +135,7 @@ namespace Services.CatFeedingManagement.Tests
         public async Task GetFeedingForPeriod_Success_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-            var results = new List<DateTime>
-            {
-                now,
-                now
-            };
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userInDbModel));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
+            SetUpMockRepositories(true, catInDbModel, userInDbModel, 1, catFeedingCreateInDbModel);
             mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
 
             var service = new CatFeedingService(
@@ -225,31 +158,7 @@ namespace Services.CatFeedingManagement.Tests
         public async Task GetFeedingForPeriod_UserNotFound_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-            var results = new List<DateTime>
-            {
-                now,
-                now
-            };
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catInDbModel));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((UserInDbModel)null));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
+            SetUpMockRepositories(true, catInDbModel, null, 1, catFeedingCreateInDbModel);
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,
@@ -271,31 +180,7 @@ namespace Services.CatFeedingManagement.Tests
         public async Task GetFeedingForPeriod_CatNotFound_Test()
         {
             //Arrange
-            DateTime now = DateTime.UtcNow;
-            var catFeedingCreateModel = new CatFeedingCreateModel(1, 1, now);
-            var catInDbModel = new CatInDbModel(1, "", 1);
-            var userInDbModel = new UserInDbModel(1, "", "", 1, "", "");
-            var catFeedingCreateInDbModel = new CatFeedingCreateInDbModel(1, 1, now);
-            var results = new List<DateTime>
-            {
-                now,
-                now
-            };
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((CatInDbModel)null));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userInDbModel));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatFeedingCreateInDbModel, CatFeedingCreateModel>(catFeedingCreateModel)).Returns(catFeedingCreateInDbModel);
-
-            var mockCatFeedingRepository = new Mock<ICatFeedingRepository>();
-            mockCatFeedingRepository.Setup(repository => repository.GetFeedingForPeriodAsync(1, 1, now.AddDays(-1), now)).Returns(Task.FromResult(results));
+            SetUpMockRepositories(true, null, userInDbModel, 1, catFeedingCreateInDbModel);
 
             var service = new CatFeedingService(
                 mockCatFeedingRepository.Object,

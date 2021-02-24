@@ -10,19 +10,17 @@ namespace ServicesTests.UserManagement
 {
     public class UserEntranceProviderTests
     {
+        private readonly UserInDbModel userInDb = new UserInDbModel(1, "max@mail.com", "max", 1, "salt", "password");
+        private readonly Mock<IUserRepository> mockUserRepository = new Mock<IUserRepository>();
+        private readonly Mock<IPasswordProtector<HashedPasswordWithSalt>> mockPasswordProtection = new Mock<IPasswordProtector<HashedPasswordWithSalt>>();
+        private readonly Mock<IMapper> mockMapper = new Mock<IMapper>();
+
         [Test]
         public async Task LogIn_Success()
         {
             //Arrange
-            var userInDb = new UserInDbModel(1, "max@mail.com", "max", 1, "salt", "password");
-
-            var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository.Setup(repository => repository.GetUserByLoginAsync("max@mail.com")).Returns(Task.FromResult(userInDb));
-
-            var mockPasswordProtection = new Mock<IPasswordProtector<HashedPasswordWithSalt>>();
             mockPasswordProtection.Setup(protection => protection.VerifyPassword(It.IsAny<HashedPasswordWithSalt>(), "password")).Returns(true);
-
-            var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<UserClaimsModel, UserInDbModel>(userInDb)).Returns(new UserClaimsModel(1, "max@mail.ru", "User"));
         
             var userEntranceProvider = new UserEntranceProvider(
@@ -43,15 +41,8 @@ namespace ServicesTests.UserManagement
         public async Task LogIn_Failed_IncorrectLoginPassword()
         {
             //Arrange
-            var userInDb = new UserInDbModel(1, "max@mail.com", "max", 1, "salt", "password");
-
-            var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository.Setup(repository => repository.GetUserByLoginAsync("max@mail.com")).Returns(Task.FromResult((UserInDbModel)null));
-
-            var mockPasswordProtection = new Mock<IPasswordProtector<HashedPasswordWithSalt>>();
             mockPasswordProtection.Setup(protection => protection.VerifyPassword(It.IsAny<HashedPasswordWithSalt>(), "password")).Returns(true);
-
-            var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<UserClaimsModel, UserInDbModel>(userInDb)).Returns(new UserClaimsModel(1, "max@mail.ru", "User"));
 
             var userEntranceProvider = new UserEntranceProvider(

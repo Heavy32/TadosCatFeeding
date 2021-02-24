@@ -8,14 +8,20 @@ namespace Services.StatisticProvision.Tests
 {
     public class StatisticServiceTests
     {
+        private static readonly StatisticInDbModel statisticInDbModel = new StatisticInDbModel(1, "", "", "");
+        private readonly StatisticResult statisticResult = new StatisticResult(new List<Dictionary<string, object>>());
+        private readonly StatisticModel statisticModel = new StatisticModel(1, "", "", "");
+        private readonly List<StatisticInDbModel> statisticModels = new List<StatisticInDbModel> { statisticInDbModel };
+        
+        private readonly Mock<IStatisticRepository> mockStatisticRepository = new Mock<IStatisticRepository>();
+        private readonly Mock<IStatisticCalculation> mockStatisticCalculation = new Mock<IStatisticCalculation>();
+        private readonly Mock<IMapper> mockMapper = new Mock<IMapper>();
+        
         [Test]
         public async Task Execute_Success_Test()
         {
             //Arrange
-            var mockStatisticRepository = new Mock<IStatisticRepository>();
-            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
-            mockStatisticCalculation.Setup(calculation => calculation.ExecuteAsync("expression")).Returns(Task.FromResult(new StatisticResult(new List<Dictionary<string, object>>())));
-            var mockMapper = new Mock<IMapper>();
+            mockStatisticCalculation.Setup(calculation => calculation.ExecuteAsync("expression")).Returns(Task.FromResult(statisticResult));
 
             var service = new StatisticService(
                 mockStatisticRepository.Object,
@@ -24,7 +30,7 @@ namespace Services.StatisticProvision.Tests
 
             //Action
             StatisticResult actualResult = await service.ExecuteAsync("expression");
-            var expectedResult = new StatisticResult(new List<Dictionary<string, object>>());
+            var expectedResult = statisticResult;
 
             //Assert
             Assert.AreEqual(actualResult.Results.Count, expectedResult.Results.Count);
@@ -34,15 +40,8 @@ namespace Services.StatisticProvision.Tests
         public async Task Get_Success()
         {
             //Arrange
-            var statisticInDbModel = new StatisticInDbModel(1, "", "", "");
-            var statisticModel = new StatisticModel(1, "", "", "");
-
-            var mockStatisticRepository = new Mock<IStatisticRepository>();
             mockStatisticRepository.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(statisticInDbModel));
-
-            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
-            mockStatisticCalculation.Setup(calculation => calculation.ExecuteAsync(statisticInDbModel.SqlExpression)).Returns(Task.FromResult(new StatisticResult(new List<Dictionary<string, object>>())));
-            var mockMapper = new Mock<IMapper>();
+            mockStatisticCalculation.Setup(calculation => calculation.ExecuteAsync(statisticInDbModel.SqlExpression)).Returns(Task.FromResult(statisticResult));
 
             var service = new StatisticService(
                 mockStatisticRepository.Object,
@@ -51,7 +50,7 @@ namespace Services.StatisticProvision.Tests
 
             //Action
             ServiceResult<StatisticResult> actualResult = await service.GetStatisticResultAsync(1);
-            var expectedResult = new ServiceResult<StatisticResult>(ServiceResultStatus.ItemRecieved, new StatisticResult(new List<Dictionary<string, object>>()));
+            var expectedResult = new ServiceResult<StatisticResult>(ServiceResultStatus.ItemRecieved, statisticResult);
 
             //Assert
             Assert.AreEqual(expectedResult.Status, actualResult.Status);
@@ -62,11 +61,7 @@ namespace Services.StatisticProvision.Tests
         public async Task Get_NotFound_Test()
         {
             //Arrange
-            var mockStatisticRepository = new Mock<IStatisticRepository>();
             mockStatisticRepository.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((StatisticInDbModel)null));
-
-            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
-            var mockMapper = new Mock<IMapper>();
 
             var service = new StatisticService(
                 mockStatisticRepository.Object,
@@ -85,14 +80,7 @@ namespace Services.StatisticProvision.Tests
         public async Task GetAll_Success_Test()
         {
             //Arrange
-            var statisticInDbModel = new StatisticInDbModel(1, "", "", "");
-            var statisticModel = new StatisticModel(1, "", "", "");
-
-            var mockStatisticRepository = new Mock<IStatisticRepository>();
-            mockStatisticRepository.Setup(repository => repository.GetAllAsync()).Returns(Task.FromResult(new List<StatisticInDbModel> { statisticInDbModel }));
-
-            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
-            var mockMapper = new Mock<IMapper>();
+            mockStatisticRepository.Setup(repository => repository.GetAllAsync()).Returns(Task.FromResult(statisticModels));
             mockMapper.Setup(mapper => mapper.Map<StatisticModel, StatisticInDbModel>(statisticInDbModel)).Returns(statisticModel);
 
             var service = new StatisticService(
@@ -114,11 +102,7 @@ namespace Services.StatisticProvision.Tests
         public async Task GetAll_GetNothing_Test()
         {
             //Arrange
-            var mockStatisticRepository = new Mock<IStatisticRepository>();
             mockStatisticRepository.Setup(repository => repository.GetAllAsync()).Returns(Task.FromResult(new List<StatisticInDbModel> { }));
-
-            var mockStatisticCalculation = new Mock<IStatisticCalculation>();
-            var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(mapper => mapper.Map<StatisticModel, StatisticInDbModel>(It.IsAny<StatisticInDbModel>())).Returns(It.IsAny<StatisticModel>());
 
             var service = new StatisticService(

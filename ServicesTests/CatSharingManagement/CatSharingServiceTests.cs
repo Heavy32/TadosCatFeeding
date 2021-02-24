@@ -9,28 +9,37 @@ namespace Services.CatSharingManagement.Tests
 {
     public class CatSharingServiceTests
     {
+        private readonly UserInDbModel user = new UserInDbModel(1, "", "", 1, "", "");
+        private readonly CatInDbModel cat = new CatInDbModel(1, "", 1);
+        private readonly CatSharingCreateInDbModel catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
+        private readonly CatSharingCreateModel catSharingCreate = new CatSharingCreateModel(1, 1);
+
+        private readonly Mock<ICatSharingRepository> mockCatSharingDatabase = new Mock<ICatSharingRepository>();
+        private readonly Mock<ICatRepository> mockCatDatabase = new Mock<ICatRepository>();
+        private readonly Mock<IUserRepository> mockUserDatabase = new Mock<IUserRepository>();
+        private readonly Mock<IMapper> mockMapper = new Mock<IMapper>();
+
+        private void SetUpMockRepositories(
+            int catSharingCreateResult,
+            bool isPetShared,
+            CatInDbModel catGetResult,
+            UserInDbModel userGetResult,
+            CatSharingCreateInDbModel mapperResult)
+        {
+            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(catSharingCreateResult));
+            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(isPetShared));
+            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(catGetResult));
+            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(userGetResult));
+            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(mapperResult);
+
+        }
+
         [Test]
         public async Task Share_Success_Test()
         {
             //Arrange
-            var user = new UserInDbModel(1, "", "", 1, "", "");
-            var cat = new CatInDbModel(1, "", 1);
-            var catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
-            var catSharingCreate = new CatSharingCreateModel(1, 1);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(1));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(cat));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(catSharingCreateInDb);
-
+            SetUpMockRepositories(1, true, cat, user, catSharingCreateInDb);
+            
             var service = new CatSharingService(
                 mockCatSharingDatabase.Object,
                 mockCatDatabase.Object,
@@ -49,24 +58,8 @@ namespace Services.CatSharingManagement.Tests
         public async Task Share_UserNotFound_Test()
         {
             //Arrange
-            var user = new UserInDbModel(1, "", "", 1, "", "");
-            var cat = new CatInDbModel(1, "", 1);
-            var catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
-            var catSharingCreate = new CatSharingCreateModel(1, 1);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(1));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(false));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(cat));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((UserInDbModel)null));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(catSharingCreateInDb);
-
+            SetUpMockRepositories(1, false, cat, null, catSharingCreateInDb);
+            
             var service = new CatSharingService(
                 mockCatSharingDatabase.Object,
                 mockCatDatabase.Object,
@@ -86,23 +79,7 @@ namespace Services.CatSharingManagement.Tests
         public async Task Share_CatNotFound_Test()
         {
             //Arrange
-            var user = new UserInDbModel(1, "", "", 1, "", "");
-            var cat = new CatInDbModel(1, "", 1);
-            var catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
-            var catSharingCreate = new CatSharingCreateModel(1, 1);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(1));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult((CatInDbModel)null));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(catSharingCreateInDb);
+            SetUpMockRepositories(1, true, null, user, catSharingCreateInDb);
 
             var service = new CatSharingService(
                 mockCatSharingDatabase.Object,
@@ -123,23 +100,7 @@ namespace Services.CatSharingManagement.Tests
         public async Task Share_UserCannotShare_Test()
         {
             //Arrange
-            var user = new UserInDbModel(1, "", "", 1, "", "");
-            var cat = new CatInDbModel(1, "", 1);
-            var catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
-            var catSharingCreate = new CatSharingCreateModel(1, 1);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(1));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(cat));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(catSharingCreateInDb);
+            SetUpMockRepositories(1, true, cat, user, catSharingCreateInDb);
 
             var service = new CatSharingService(
                 mockCatSharingDatabase.Object,
@@ -160,23 +121,7 @@ namespace Services.CatSharingManagement.Tests
         public async Task IsPetShared_Success_Test()
         {
             //Arrange
-            var user = new UserInDbModel(1, "", "", 1, "", "");
-            var cat = new CatInDbModel(1, "", 1);
-            var catSharingCreateInDb = new CatSharingCreateInDbModel(1, 1);
-            var catSharingCreate = new CatSharingCreateModel(1, 1);
-
-            var mockCatSharingDatabase = new Mock<ICatSharingRepository>();
-            mockCatSharingDatabase.Setup(repository => repository.CreateAsync(catSharingCreateInDb)).Returns(Task.FromResult(1));
-            mockCatSharingDatabase.Setup(repository => repository.IsPetSharedWithUserAsync(1, 1)).Returns(Task.FromResult(true));
-
-            var mockCatDatabase = new Mock<ICatRepository>();
-            mockCatDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(cat));
-
-            var mockUserDatabase = new Mock<IUserRepository>();
-            mockUserDatabase.Setup(repository => repository.GetAsync(1)).Returns(Task.FromResult(user));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(mapper => mapper.Map<CatSharingCreateInDbModel, CatSharingCreateModel>(catSharingCreate)).Returns(catSharingCreateInDb);
+            SetUpMockRepositories(1, true, cat, user, catSharingCreateInDb);
 
             var service = new CatSharingService(
                 mockCatSharingDatabase.Object,
