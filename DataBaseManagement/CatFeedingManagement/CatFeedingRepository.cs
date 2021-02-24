@@ -11,59 +11,50 @@ namespace DataBaseManagement.CatFeedingManagement
         public CatFeedingRepository(string connectionString) : base(connectionString) { }
 
         public async Task<int> CreateAsync(CatFeedingCreateInDbModel info)
-        {
-            return (int)await ExecuteWithOutResultAsync(
-                "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time) VALUES (@user_Id, @pet_Id, @feed_Time); SET @id=SCOPE_IDENTITY();",
-                 new SqlParameter[]
-                 {
-                     new SqlParameter("@user_Id", info.UserId),
-                     new SqlParameter("@pet_Id", info.CatId),
-                     new SqlParameter("@feed_Time", info.FeedingTime),
-                     new SqlParameter
+            => await ExecuteSqlCommand(
+                    "INSERT INTO FeedTime (User_Id, Pet_Id, Feed_Time) VALUES (@user_Id, @pet_Id, @feed_Time); SET @id=SCOPE_IDENTITY();",
+                    async command => await command.ExecuteNonQueryAsync(),
+                    new SqlParameter[]
+                     {
+                         new SqlParameter("@user_Id", info.UserId),
+                         new SqlParameter("@pet_Id", info.CatId),
+                         new SqlParameter("@feed_Time", info.FeedingTime),
+                         new SqlParameter
+                            {
+                                ParameterName = "@id",
+                                SqlDbType = SqlDbType.Int,
+                                Direction = ParameterDirection.Output
+                            }
+                     });
+        
+        public async Task<List<CatFeedingInDbModel>> GetFeedingsForPeriodAsync(int userId, int catId, DateTime start, DateTime finish)
+            => await ExecuteSqlCommand(
+                    "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
+                    ReturnListFeeding,
+                    new SqlParameter[]
                         {
-                            ParameterName = "@id",
-                            SqlDbType = SqlDbType.Int,
-                            Direction = ParameterDirection.Output
-                        }
-                 });
-        }
+                            new SqlParameter("@userId", userId),
+                            new SqlParameter("@catId", catId),
+                            new SqlParameter("@start", start),
+                            new SqlParameter("@finish", finish)
+                        });        
 
-        public async Task<List<DateTime>> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish)
+        private async Task<List<CatFeedingInDbModel>> ReturnListFeeding(SqlCommand command)
         {
-            List<DateTime> info = new List<DateTime>();
+            SqlDataReader reader = await command.ExecuteReaderAsync();
 
-            List<CatFeedingInDbModel> feeds = await ReturnListCustomItemsAsync(
-                "SELECT User_Id, Pet_Id, Feed_Time FROM FeedTime WHERE User_Id = @userId AND Pet_Id = @catId AND Feed_Time BETWEEN @start AND @finish",
-                ReturnFeeding,
-                new SqlParameter[]
-                    {
-                        new SqlParameter("@userId", userId),
-                        new SqlParameter("@catId", catId),
-                        new SqlParameter("@start", start),
-                        new SqlParameter("@finish", finish)
-                    });
+            var list = new List<CatFeedingInDbModel>();
 
-            for (int i = 0; i < feeds.Count; i++)
+            while (reader.Read())
             {
-                info.Add(feeds[i].FeedingTime);
-            }
-
-            return info;
-        }
-
-        private CatFeedingInDbModel ReturnFeeding(SqlDataReader reader)
-        {
-            if (reader.Read())
-            {
-                return new CatFeedingInDbModel(
+                list.Add(new CatFeedingInDbModel(
                     (int)reader["Id"],
                     (int)reader["User_Id"],
                     (int)reader["Owner_Id"],
-                    (DateTime)reader["Feed_Time"]
-                    );
+                    (DateTime)reader["Feed_Time"]));
             }
             reader.Close();
-            return null;
+            return list;
         }
     }
 }

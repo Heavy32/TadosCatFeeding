@@ -7,6 +7,6 @@ namespace DataBaseManagement.CatFeedingManagement
     public interface ICatFeedingRepository
     {
         public Task<int> CreateAsync(CatFeedingCreateInDbModel info);
-        public Task<List<DateTime>> GetFeedingForPeriodAsync(int userId, int catId, DateTime start, DateTime finish);
+        public Task<List<CatFeedingInDbModel>> GetFeedingsForPeriodAsync(int userId, int catId, DateTime start, DateTime finish);
     }
 }
